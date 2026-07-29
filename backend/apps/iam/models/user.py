@@ -5,7 +5,7 @@ from django.contrib.auth.models import (
 
 from django.db import models
 
-from apps.common.models import BaseModel
+from apps.common.models.base import BaseModel
 
 from .managers import UserManager
 

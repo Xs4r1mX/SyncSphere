@@ -1,5 +1,5 @@
 from django.contrib.auth.base_user import BaseUserManager
-from apps.common.utils import generate_username
+from apps.common.utils.username import generate_username
 
 
 class UserManager(BaseUserManager):
