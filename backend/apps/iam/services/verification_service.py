@@ -13,6 +13,8 @@ class VerificationService:
     @classmethod
     def create_email_verification_token(cls, user):
 
+        cls.invalidate_existing_tokens(user)
+
         expires_at = (
             timezone.now()
             + datetime.timedelta(
@@ -80,3 +82,48 @@ class VerificationService:
 
 
         return user
+
+
+    @classmethod
+    def invalidate_existing_tokens(cls, user):
+
+        EmailVerificationToken.objects.filter(
+            user=user,
+            verified_at__isnull=True,
+            invalidated_at__isnull=True,
+        ).update(
+            invalidated_at=timezone.now()
+        )
+
+
+    @classmethod
+    def regenerate_verification_token(cls, email):
+
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+
+        user = User.objects.filter(
+            email=email
+        ).first()
+
+
+        if not user:
+            raise ValueError(
+                "User not found."
+            )
+
+
+        if user.is_verified:
+            raise ValueError(
+                "Email is already verified."
+            )
+
+
+        token = cls.create_email_verification_token(
+            user
+        )
+
+
+        return user, token

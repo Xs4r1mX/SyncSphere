@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.iam.views import RegisterAPIView, VerifyEmailAPIView
+from apps.iam.views import RegisterAPIView, VerifyEmailAPIView, ResendVerificationAPIView
 
 app_name = "iam"
 
@@ -14,5 +14,10 @@ urlpatterns = [
         "verify-email/<uuid:token>/",
         VerifyEmailAPIView.as_view(),
         name="verify-email",
+    ),
+    path(
+        "resend-verification/",
+        ResendVerificationAPIView.as_view(),
+        name="resend-verification",
     ),
 ]

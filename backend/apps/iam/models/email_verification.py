@@ -30,6 +30,11 @@ class EmailVerificationToken(models.Model):
         auto_now_add=True,
     )
 
+    invalidated_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
 
     class Meta:
         db_table = "email_verification_tokens"
@@ -48,3 +53,17 @@ class EmailVerificationToken(models.Model):
     @property
     def is_verified(self):
         return self.verified_at is not None
+
+
+    @property
+    def is_invalidated(self):
+        return self.invalidated_at is not None
+    
+
+    @property
+    def is_active(self):
+        return (
+            not self.is_expired
+            and not self.is_verified
+            and not self.is_invalidated
+        )
