@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.iam.views import RegisterAPIView, VerifyEmailAPIView, ResendVerificationAPIView
+from apps.iam.views import RegisterAPIView, VerifyEmailAPIView, ResendVerificationAPIView, LoginAPIView
 
 app_name = "iam"
 
@@ -19,5 +19,11 @@ urlpatterns = [
         "resend-verification/",
         ResendVerificationAPIView.as_view(),
         name="resend-verification",
+    ),
+
+    path(
+        "login/",
+        LoginAPIView.as_view(),
+        name="login",
     ),
 ]

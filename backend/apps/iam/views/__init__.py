@@ -1,3 +1,4 @@
 from .register import RegisterAPIView
 from .verify_email import VerifyEmailAPIView
 from .resend_verification import ResendVerificationAPIView
+from .login import LoginAPIView
