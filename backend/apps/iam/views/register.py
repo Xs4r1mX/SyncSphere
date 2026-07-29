@@ -5,6 +5,9 @@ from rest_framework.views import APIView
 from apps.iam.serializers import RegisterSerializer, UserSerializer
 from apps.iam.services import AuthService
 from apps.common.responses import ApiResponse
+from django.conf import settings
+
+from apps.notification.services.email_service import EmailService
 
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
@@ -13,8 +16,17 @@ class RegisterAPIView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = AuthService.register_user(
+        user, verification_token = AuthService.register_user(
             **serializer.validated_data
+        )
+
+        verification_url = (
+            f"{settings.FRONTEND_URL}/verify-email/{verification_token.token}"
+        )
+
+        EmailService.send_verification_email(
+            user=user,
+            verification_url=verification_url,
         )
 
         return ApiResponse(

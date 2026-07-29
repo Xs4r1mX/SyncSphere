@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
+from .verification_service import VerificationService
+
 User = get_user_model()
 
 
@@ -25,9 +27,15 @@ class AuthService:
         - Send verification email (later)
         """
 
-        return User.objects.create_user(
+        user = User.objects.create_user(
             email=email,
             first_name=first_name,
             last_name=last_name,
             password=password,
         )
+
+        verification_token = VerificationService.create_email_verification_token(
+            user=user
+        )
+
+        return user, verification_token
