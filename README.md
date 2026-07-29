@@ -1,4 +1,4 @@
-# CloudHub
+# SyncSphere
 
 A centralized cloud storage management platform built with Django REST Framework and React.
 

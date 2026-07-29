@@ -1,0 +1,9 @@
+Hello {{ first_name }},
+
+Thanks for joining SyncSphere.
+
+Please verify your email:
+
+{{ verification_url }}
+
+This link expires in {{ expiry_hours }} hours.
