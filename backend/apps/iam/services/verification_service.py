@@ -28,3 +28,55 @@ class VerificationService:
         )
 
         return verification_token
+
+
+    @classmethod
+    def verify_email_token(cls, token):
+
+        verification = (
+            EmailVerificationToken.objects
+            .select_related("user")
+            .filter(token=token)
+            .first()
+        )
+
+
+        if not verification:
+            raise ValueError(
+                "Invalid verification token."
+            )
+
+
+        if verification.is_verified:
+            raise ValueError(
+                "Email is already verified."
+            )
+
+
+        if verification.is_expired:
+            raise ValueError(
+                "Verification token has expired."
+            )
+
+
+        user = verification.user
+
+
+        user.is_verified = True
+        user.save(
+            update_fields=[
+                "is_verified"
+            ]
+        )
+
+
+        verification.verified_at = timezone.now()
+
+        verification.save(
+            update_fields=[
+                "verified_at"
+            ]
+        )
+
+
+        return user
