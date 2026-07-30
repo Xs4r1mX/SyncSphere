@@ -5,6 +5,13 @@ from django.utils import timezone
 
 from apps.iam.models import EmailVerificationToken
 
+from apps.common.exceptions import (
+    InvalidVerificationTokenException,
+    VerificationTokenExpiredException,
+    EmailAlreadyVerifiedException,
+    UserNotFoundException,
+)
+
 
 class VerificationService:
 
@@ -15,74 +22,43 @@ class VerificationService:
 
         cls.invalidate_existing_tokens(user)
 
-        expires_at = (
-            timezone.now()
-            + datetime.timedelta(
-                hours=cls.EXPIRY_HOURS
-            )
-        )
+        expires_at = timezone.now() + datetime.timedelta(hours=cls.EXPIRY_HOURS)
 
-        verification_token = (
-            EmailVerificationToken.objects.create(
-                user=user,
-                expires_at=expires_at,
-            )
+        verification_token = EmailVerificationToken.objects.create(
+            user=user,
+            expires_at=expires_at,
         )
 
         return verification_token
-
 
     @classmethod
     def verify_email_token(cls, token):
 
         verification = (
-            EmailVerificationToken.objects
-            .select_related("user")
+            EmailVerificationToken.objects.select_related("user")
             .filter(token=token)
             .first()
         )
 
-
         if not verification:
-            raise ValueError(
-                "Invalid verification token."
-            )
-
+            raise InvalidVerificationTokenException()
 
         if verification.is_verified:
-            raise ValueError(
-                "Email is already verified."
-            )
-
+            raise EmailAlreadyVerifiedException()
 
         if verification.is_expired:
-            raise ValueError(
-                "Verification token has expired."
-            )
-
+            raise VerificationTokenExpiredException()
 
         user = verification.user
 
-
         user.is_verified = True
-        user.save(
-            update_fields=[
-                "is_verified"
-            ]
-        )
-
+        user.save(update_fields=["is_verified"])
 
         verification.verified_at = timezone.now()
 
-        verification.save(
-            update_fields=[
-                "verified_at"
-            ]
-        )
-
+        verification.save(update_fields=["verified_at"])
 
         return user
-
 
     @classmethod
     def invalidate_existing_tokens(cls, user):
@@ -91,10 +67,7 @@ class VerificationService:
             user=user,
             verified_at__isnull=True,
             invalidated_at__isnull=True,
-        ).update(
-            invalidated_at=timezone.now()
-        )
-
+        ).update(invalidated_at=timezone.now())
 
     @classmethod
     def regenerate_verification_token(cls, email):
@@ -103,27 +76,14 @@ class VerificationService:
 
         User = get_user_model()
 
-
-        user = User.objects.filter(
-            email=email
-        ).first()
-
+        user = User.objects.filter(email=email).first()
 
         if not user:
-            raise ValueError(
-                "User not found."
-            )
-
+            raise UserNotFoundException()
 
         if user.is_verified:
-            raise ValueError(
-                "Email is already verified."
-            )
+            raise EmailAlreadyVerifiedException()
 
-
-        token = cls.create_email_verification_token(
-            user
-        )
-
+        token = cls.create_email_verification_token(user)
 
         return user, token

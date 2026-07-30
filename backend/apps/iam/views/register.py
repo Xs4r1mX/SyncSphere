@@ -9,6 +9,7 @@ from django.conf import settings
 
 from apps.notification.services.email_service import EmailService
 
+
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -16,22 +17,30 @@ class RegisterAPIView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user, verification_token = AuthService.register_user(
-            **serializer.validated_data
-        )
+        try:
 
-        verification_url = (
-            f"{settings.FRONTEND_URL}/verify-email/{verification_token.token}"
-        )
+            user, verification_token = AuthService.register_user(
+                **serializer.validated_data
+            )
 
-        EmailService.send_verification_email(
-            user=user,
-            verification_url=verification_url,
-        )
+            verification_url = (
+                f"{settings.FRONTEND_URL}/verify-email/{verification_token.token}"
+            )
 
-        return ApiResponse(
-            success=True,
-            message="User registered successfully.",
-            data=UserSerializer(user).data,
-            status_code=status.HTTP_201_CREATED,
-        )
+            EmailService.send_verification_email(
+                user=user,
+                verification_url=verification_url,
+            )
+
+            return ApiResponse(
+                success=True,
+                message="User registered successfully.",
+                data=UserSerializer(user).data,
+                status_code=status.HTTP_201_CREATED,
+            )
+        except Exception as error:
+            return ApiResponse(
+                success=False,
+                message=str(error),
+                status_code=getattr(error, "status_code", 500),
+            )

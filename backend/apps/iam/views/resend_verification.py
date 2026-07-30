@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 
+from django.conf import settings
+
 from apps.iam.serializers import ResendVerificationSerializer
 
 from apps.iam.services import VerificationService
@@ -25,18 +27,18 @@ class ResendVerificationAPIView(APIView):
                 serializer.validated_data["email"]
             )
 
-            verification_url = f"http://localhost:3000/" f"verify-email/{token.token}"
+            verification_url = f"{settings.FRONTEND_URL}/verify-email/{token}"
 
             EmailService.send_verification_email(
                 user=user,
                 verification_url=verification_url,
             )
 
-        except ValueError as e:
+        except Exception as e:
             return ApiResponse(
                 success=False,
                 message=str(e),
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=getattr(e, "status_code", 500),
             )
 
         return ApiResponse(

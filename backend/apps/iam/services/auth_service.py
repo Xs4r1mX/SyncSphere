@@ -7,6 +7,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .verification_service import VerificationService
 
+from apps.common.exceptions import (
+    IncorrectPasswordException,
+    UserNotFoundException,
+    InactiveUserException,
+    EmailNotVerifiedException
+)
+
 User = get_user_model()
 
 
@@ -52,21 +59,21 @@ class AuthService:
         """
 
         if User.objects.filter(email=email).exists() is False:
-            raise ValueError("User with this email does not exist.")
+            raise UserNotFoundException()
 
         user = authenticate(username=email, password=password)
 
         if not user:
 
-            raise ValueError("Incorrect password.")
+            raise IncorrectPasswordException()
 
         if not user.is_active:
 
-            raise ValueError("Account is inactive.")
+            raise InactiveUserException()
 
         if not user.is_verified:
 
-            raise ValueError("Please verify your email first.")
+            raise EmailNotVerifiedException()
 
         return user
 
