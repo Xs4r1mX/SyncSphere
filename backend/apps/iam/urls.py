@@ -5,6 +5,7 @@ from apps.iam.views import (
     VerifyEmailAPIView,
     ResendVerificationAPIView,
     LoginAPIView,
+    RefreshTokenAPIView,
 )
 
 app_name = "iam"
@@ -29,5 +30,10 @@ urlpatterns = [
         "login/",
         LoginAPIView.as_view(),
         name="login",
+    ),
+    path(
+        "refresh/",
+        RefreshTokenAPIView.as_view(),
+        name="refresh-token",
     ),
 ]
