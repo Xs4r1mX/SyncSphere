@@ -108,3 +108,13 @@ class TokenService:
         """
 
         refresh.blacklist()
+
+    @staticmethod
+    def logout(refresh_token: str):
+        """
+        Blacklist refresh token.
+        """
+
+        refresh = TokenService._get_refresh_token(refresh_token)
+
+        TokenService.blacklist_refresh_token(refresh)
