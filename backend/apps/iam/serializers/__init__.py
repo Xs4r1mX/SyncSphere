@@ -5,3 +5,4 @@ from .resend_verification import ResendVerificationSerializer
 from .login import LoginSerializer
 from .refresh_token import RefreshTokenSerializer
 from .logout import LogoutSerializer
+from .change_password import ChangePasswordSerializer
