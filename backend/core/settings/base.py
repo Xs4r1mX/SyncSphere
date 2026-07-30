@@ -101,6 +101,9 @@ AUTH_USER_MODEL = "iam.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
+        "NAME": 'apps.common.validators.password.PasswordValidator',
+    },
+    {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {

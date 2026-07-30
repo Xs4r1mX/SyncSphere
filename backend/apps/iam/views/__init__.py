@@ -4,3 +4,5 @@ from .resend_verification import ResendVerificationAPIView
 from .login import LoginAPIView
 from .refresh import RefreshTokenAPIView
 from .logout import LogoutAPIView
+from .me import CurrentUserAPIView
+from .change_password import ChangePasswordAPIView
