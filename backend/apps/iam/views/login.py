@@ -5,7 +5,7 @@ from rest_framework import status
 from apps.common.responses import ApiResponse
 
 from apps.iam.serializers import LoginSerializer
-from apps.iam.services import AuthService
+from apps.iam.services import AuthService, TokenService
 from apps.iam.serializers import UserSerializer
 
 
@@ -26,7 +26,7 @@ class LoginAPIView(APIView):
                 password=serializer.validated_data["password"],
             )
 
-            tokens = AuthService.generate_tokens(user)
+            tokens = TokenService.generate_tokens(user)
 
             return ApiResponse(
                 success=True,

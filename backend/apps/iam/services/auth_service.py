@@ -3,7 +3,6 @@ from django.db import transaction
 
 from django.contrib.auth import authenticate
 
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from .verification_service import VerificationService
 
@@ -11,7 +10,7 @@ from apps.common.exceptions import (
     IncorrectPasswordException,
     UserNotFoundException,
     InactiveUserException,
-    EmailNotVerifiedException
+    EmailNotVerifiedException,
 )
 
 User = get_user_model()
@@ -76,10 +75,3 @@ class AuthService:
             raise EmailNotVerifiedException()
 
         return user
-
-    @staticmethod
-    def generate_tokens(user):
-
-        refresh = RefreshToken.for_user(user)
-
-        return {"refresh": str(refresh), "access": str(refresh.access_token)}

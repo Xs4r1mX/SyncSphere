@@ -42,3 +42,9 @@ class VerificationTokenExpiredException(AppException):
 
     status_code = status.HTTP_400_BAD_REQUEST
     default_message = "Verification token has expired."
+
+
+class InvalidRefreshTokenException(AppException):
+
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_message = "Invalid refresh token."
