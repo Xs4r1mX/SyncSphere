@@ -9,6 +9,8 @@ from apps.iam.views import (
     LogoutAPIView,
     CurrentUserAPIView,
     ChangePasswordAPIView,
+    ForgotPasswordAPIView,
+    ResetPasswordAPIView,
 )
 
 app_name = "iam"
@@ -53,5 +55,15 @@ urlpatterns = [
         "change-password/",
         ChangePasswordAPIView.as_view(),
         name="change-password",
+    ),
+    path(
+        "forgot-password/",
+        ForgotPasswordAPIView.as_view(),
+        name="forgot-password",
+    ),
+    path(
+        "reset-password/",
+        ResetPasswordAPIView.as_view(),
+        name="reset-password",
     ),
 ]

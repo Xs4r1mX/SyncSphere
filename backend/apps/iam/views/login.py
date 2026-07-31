@@ -28,6 +28,16 @@ class LoginAPIView(APIView):
 
             tokens = TokenService.generate_tokens(user)
 
+            # Send login notification email via AuthService
+            try:
+                AuthService.send_login_email(
+                    user=user,
+                    ip_address=request.META.get("REMOTE_ADDR"),
+                )
+            except Exception:
+                # Do not block login on email failures
+                pass
+
             return ApiResponse(
                 success=True,
                 message="Login successful.",

@@ -1,0 +1,10 @@
+Hi {{ first_name }},
+
+We detected a sign-in to your SyncSphere account on {{ login_time }}.
+{% if ip_address %}
+IP address: {{ ip_address }}
+{% endif %}
+
+If this was you, you can safely ignore this message. If you did not sign in, please secure your account.
+
+— The SyncSphere Team

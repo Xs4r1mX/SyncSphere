@@ -19,18 +19,7 @@ class RegisterAPIView(APIView):
 
         try:
 
-            user, verification_token = AuthService.register_user(
-                **serializer.validated_data
-            )
-
-            verification_url = (
-                f"{settings.FRONTEND_URL}/verify-email/{verification_token.token}"
-            )
-
-            EmailService.send_verification_email(
-                user=user,
-                verification_url=verification_url,
-            )
+            user = AuthService.register_user(**serializer.validated_data)
 
             return ApiResponse(
                 success=True,

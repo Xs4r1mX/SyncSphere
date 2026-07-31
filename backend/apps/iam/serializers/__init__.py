@@ -6,3 +6,5 @@ from .login import LoginSerializer
 from .refresh_token import RefreshTokenSerializer
 from .logout import LogoutSerializer
 from .change_password import ChangePasswordSerializer
+from .forgot_password import ForgotPasswordSerializer
+from .reset_password import ResetPasswordSerializer

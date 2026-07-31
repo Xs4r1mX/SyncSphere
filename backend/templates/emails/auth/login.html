@@ -1,0 +1,11 @@
+<html>
+  <body>
+    <p>Hi {{ first_name }},</p>
+    <p>We detected a sign-in to your SyncSphere account on {{ login_time }}.</p>
+    {% if ip_address %}
+    <p>IP address: {{ ip_address }}</p>
+    {% endif %}
+    <p>If this was you, you can safely ignore this message. If you did not sign in, please secure your account.</p>
+    <p>— The SyncSphere Team</p>
+  </body>
+</html>

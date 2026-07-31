@@ -28,5 +28,5 @@ class VerifyEmailAPIView(APIView):
             return ApiResponse(
                 success=False,
                 message=str(error),
-                status_code=getattr(error, "status_code", 500)
+                status_code=getattr(error, "status_code", 500),
             )

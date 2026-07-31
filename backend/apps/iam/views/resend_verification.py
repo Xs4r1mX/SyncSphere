@@ -8,7 +8,7 @@ from apps.iam.serializers import ResendVerificationSerializer
 
 from apps.iam.services import VerificationService
 
-from apps.notification.services import EmailService
+from apps.iam.services import VerificationService
 from apps.common.responses.api_response import ApiResponse
 
 
@@ -27,12 +27,7 @@ class ResendVerificationAPIView(APIView):
                 serializer.validated_data["email"]
             )
 
-            verification_url = f"{settings.FRONTEND_URL}/verify-email/{token}"
-
-            EmailService.send_verification_email(
-                user=user,
-                verification_url=verification_url,
-            )
+            VerificationService.send_verification_email(user, token)
 
         except Exception as e:
             return ApiResponse(
