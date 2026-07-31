@@ -26,9 +26,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         email = value.lower().strip()
 
         if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError(
-                "A user with this email already exists."
-            )
+            raise serializers.ValidationError("A user with this email already exists.")
 
         return email
 
@@ -36,9 +34,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         value = value.strip()
 
         if not value:
-            raise serializers.ValidationError(
-                "First name is required."
-            )
+            raise serializers.ValidationError("First name is required.")
 
         return value
 
@@ -46,8 +42,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         value = value.strip()
 
         if not value:
-            raise serializers.ValidationError(
-                "Last name is required."
-            )
+            raise serializers.ValidationError("Last name is required.")
 
         return value

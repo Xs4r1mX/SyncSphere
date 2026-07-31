@@ -17,9 +17,7 @@ class CustomUserAdmin(UserAdmin):
         "created_at",
     )
 
-    ordering = (
-        "created_at",
-    )
+    ordering = ("created_at",)
 
     fieldsets = (
         (
@@ -29,9 +27,8 @@ class CustomUserAdmin(UserAdmin):
                     "email",
                     "password",
                 )
-            }
+            },
         ),
-
         (
             "Personal Information",
             {
@@ -44,9 +41,8 @@ class CustomUserAdmin(UserAdmin):
                     "bio",
                     "timezone",
                 )
-            }
+            },
         ),
-
         (
             "Permissions",
             {
@@ -57,18 +53,9 @@ class CustomUserAdmin(UserAdmin):
                     "groups",
                     "user_permissions",
                 )
-            }
+            },
         ),
-
-        (
-            "Verification",
-            {
-                "fields": (
-                    "is_verified",
-                )
-            }
-        ),
-
+        ("Verification", {"fields": ("is_verified",)}),
         (
             "Important Dates",
             {
@@ -77,10 +64,9 @@ class CustomUserAdmin(UserAdmin):
                     "created_at",
                     "updated_at",
                 )
-            }
+            },
         ),
     )
-
 
     readonly_fields = (
         "created_at",

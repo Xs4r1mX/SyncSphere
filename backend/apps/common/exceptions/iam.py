@@ -8,6 +8,7 @@ class IncorrectPasswordException(AppException):
     status_code = status.HTTP_401_UNAUTHORIZED
     default_message = "Incorrect password."
 
+
 class UserNotFoundException(AppException):
 
     status_code = status.HTTP_404_NOT_FOUND
@@ -30,6 +31,12 @@ class InvalidVerificationTokenException(AppException):
 
     status_code = status.HTTP_400_BAD_REQUEST
     default_message = "Invalid verification token."
+
+
+class InvalidPasswordResetTokenException(AppException):
+
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_message = "Invalid password reset token."
 
 
 class EmailAlreadyVerifiedException(AppException):

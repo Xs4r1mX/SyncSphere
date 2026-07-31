@@ -11,6 +11,7 @@ from apps.common.exceptions import (
     EmailAlreadyVerifiedException,
     UserNotFoundException,
 )
+from apps.notification.services import EmailService
 
 
 class VerificationService:
@@ -30,6 +31,30 @@ class VerificationService:
         )
 
         return verification_token
+
+    @classmethod
+    def send_verification_email(cls, user, verification_token):
+        """
+        Send email verification message to the user.
+
+        Mirrors the behavior of the password reset email sender: builds
+        a frontend verification URL and calls the notification EmailService
+        to send the templated message.
+        """
+
+        verification_url = f"{settings.EMAIL_VERIFICATION_FRONTEND_URL}?token={verification_token.token}"
+
+        EmailService.send_email(
+            subject="Verify your SyncSphere account",
+            recipient=user.email,
+            html_template=("emails/auth/verify_email.html"),
+            text_template=("emails/auth/verify_email.txt"),
+            context={
+                "first_name": user.first_name,
+                "verification_url": verification_url,
+                "expiry_hours": (settings.EMAIL_VERIFICATION_EXPIRY_HOURS),
+            },
+        )
 
     @classmethod
     def verify_email_token(cls, token):

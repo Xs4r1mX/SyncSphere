@@ -35,5 +35,5 @@ class LogoutAPIView(APIView):
             return ApiResponse(
                 success=False,
                 message=str(exc),
-                status_code=getattr(exc, "status_code", 500)
+                status_code=getattr(exc, "status_code", 500),
             )

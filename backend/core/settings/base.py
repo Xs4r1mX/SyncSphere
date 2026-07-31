@@ -61,20 +61,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'core.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
@@ -195,3 +181,11 @@ TEMPLATES = [
 EMAIL_VERIFICATION_EXPIRY_HOURS = int(os.getenv("EMAIL_VERIFICATION_EXPIRY_HOURS", 24))
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
+SECURE_TOKEN_BYTES = int(os.getenv("SECURE_TOKEN_BYTES", 32))
+
+PASSWORD_RESET_TOKEN_EXPIRY_MINUTES = int(os.getenv("PASSWORD_RESET_TOKEN_EXPIRY_MINUTES", 15))
+
+PASSWORD_RESET_FRONTEND_URL = f"{FRONTEND_URL}/reset-password"
+
+EMAIL_VERIFICATION_FRONTEND_URL = f"{FRONTEND_URL}/verify-email"

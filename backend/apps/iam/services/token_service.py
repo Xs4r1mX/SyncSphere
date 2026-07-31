@@ -1,5 +1,12 @@
 from django.contrib.auth import get_user_model
 
+from django.db import transaction
+
+from rest_framework_simplejwt.token_blacklist.models import (
+    OutstandingToken,
+    BlacklistedToken,
+)
+
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
@@ -118,3 +125,18 @@ class TokenService:
         refresh = TokenService._get_refresh_token(refresh_token)
 
         TokenService.blacklist_refresh_token(refresh)
+
+    @staticmethod
+    @transaction.atomic
+    def logout_all_devices(user):
+        """
+        Logout user from all devices by
+        blacklisting every outstanding
+        refresh token.
+        """
+
+        outstanding_tokens = OutstandingToken.objects.filter(user=user)
+
+        for token in outstanding_tokens:
+
+            BlacklistedToken.objects.get_or_create(token=token)
