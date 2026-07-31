@@ -22,7 +22,7 @@ urlpatterns = [
         name="register",
     ),
     path(
-        "verify-email/<uuid:token>/",
+        "verify-email/<str:token>/",
         VerifyEmailAPIView.as_view(),
         name="verify-email",
     ),

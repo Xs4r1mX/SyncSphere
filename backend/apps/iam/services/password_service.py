@@ -84,14 +84,14 @@ class PasswordService:
         user = User.objects.filter(email=email).first()
 
         if not user:
-            return UserNotFoundException()
+            raise UserNotFoundException()
 
         # Optional security check
         if not user.is_active:
-            return InactiveUserException()
+            raise InactiveUserException()
 
-        if not user.is_email_verified:
-            return EmailNotVerifiedException()
+        if not user.is_verified:
+            raise EmailNotVerifiedException()
 
         reset_token = PasswordService._create_password_reset_token(user)
 
@@ -116,8 +116,8 @@ class PasswordService:
         EmailService.send_email(
             subject="Reset your SyncSphere password",
             recipient=user.email,
-            html_template=("emails/auth/password_reset.html"),
-            text_template=("emails/auth/password_reset.txt"),
+            html_template=("emails/auth/reset_password.html"),
+            text_template=("emails/auth/reset_password.txt"),
             context={
                 "first_name": user.first_name,
                 "reset_url": reset_url,
