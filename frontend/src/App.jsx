@@ -1,11 +1,10 @@
-import { Button } from '@/components/ui/button';
+import { RouterProvider } from 'react-router-dom';
 
-function App() {
-  return (
-    <div className="flex h-screen items-center justify-center">
-      <Button>Cloud Management Platform</Button>
-    </div>
-  );
+import { router } from '@/app/routes/router';
+import { useAuthBootstrap } from '@/features/auth';
+
+export default function App() {
+  useAuthBootstrap();
+
+  return <RouterProvider router={router} />;
 }
-
-export default App;
