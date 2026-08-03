@@ -65,7 +65,7 @@ class VerificationService:
             .first()
         )
 
-        if not verification:
+        if not verification or verification.is_invalidated:
             raise InvalidVerificationTokenException()
 
         if verification.is_verified:

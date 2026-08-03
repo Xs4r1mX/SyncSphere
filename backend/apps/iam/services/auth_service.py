@@ -54,7 +54,7 @@ class AuthService:
             user=user, verification_token=verification_token
         )
 
-        return user, verification_token
+        return user
 
     @staticmethod
     def authenticate_user(*, email, password):

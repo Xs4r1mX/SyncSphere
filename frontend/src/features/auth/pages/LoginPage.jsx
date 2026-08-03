@@ -13,7 +13,7 @@ export function LoginPage() {
       <CardHeader>
         <CardTitle>Sign in</CardTitle>
         <CardDescription>
-          Access your SyncSphere cloud storage workspace.
+          Access your SyncSphere workspace.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -1,12 +1,12 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
+import { TriangleAlert } from 'lucide-react';
 
 import { FormField } from './FormField';
 import { useLogin } from '../hooks/useLogin';
 import { loginSchema } from '../validation/loginSchema';
 import { PATHS } from '@/app/routes/paths';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 export function LoginForm() {
@@ -30,12 +30,6 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-      {login.error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{login.error.message}</AlertDescription>
-        </Alert>
-      ) : null}
-
       <FormField
         id="email"
         label="Email"
@@ -54,10 +48,21 @@ export function LoginForm() {
         registration={register('password')}
       />
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-3">
+        {login.error ? (
+          <p
+            role="alert"
+            className="flex min-w-0 items-center gap-1.5 text-sm text-destructive"
+          >
+            <TriangleAlert className="size-4 shrink-0" />
+            <span className="truncate">{login.error.message}</span>
+          </p>
+        ) : (
+          <span />
+        )}
         <Link
           to={PATHS.FORGOT_PASSWORD}
-          className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          className="shrink-0 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
           Forgot password?
         </Link>
@@ -69,7 +74,10 @@ export function LoginForm() {
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{' '}
-        <Link to={PATHS.REGISTER} className="underline-offset-4 hover:underline">
+        <Link
+          to={PATHS.REGISTER}
+          className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
+        >
           Register
         </Link>
       </p>

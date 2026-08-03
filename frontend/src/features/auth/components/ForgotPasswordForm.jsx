@@ -1,12 +1,12 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
+import { CircleCheck, TriangleAlert } from 'lucide-react';
 
 import { FormField } from './FormField';
 import { useForgotPassword } from '../hooks/useForgotPassword';
 import { forgotPasswordSchema } from '../validation/forgotPasswordSchema';
 import { PATHS } from '@/app/routes/paths';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 export function ForgotPasswordForm() {
@@ -29,20 +29,6 @@ export function ForgotPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-      {forgotPassword.error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{forgotPassword.error.message}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      {forgotPassword.isSuccess ? (
-        <Alert>
-          <AlertDescription>
-            A password reset link has been sent if that email is registered.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
       <FormField
         id="email"
         label="Email"
@@ -54,12 +40,37 @@ export function ForgotPasswordForm() {
         registration={register('email')}
       />
 
+      {forgotPassword.error ? (
+        <p
+          role="alert"
+          className="flex items-center gap-1.5 text-sm text-destructive"
+        >
+          <TriangleAlert className="size-4 shrink-0" />
+          <span>{forgotPassword.error.message}</span>
+        </p>
+      ) : null}
+
+      {forgotPassword.isSuccess ? (
+        <p
+          role="status"
+          className="flex items-start gap-1.5 text-sm text-foreground"
+        >
+          <CircleCheck className="mt-0.5 size-4 shrink-0" />
+          <span>
+            A password reset link has been sent if that email is registered.
+          </span>
+        </p>
+      ) : null}
+
       <Button type="submit" disabled={forgotPassword.isPending}>
         {forgotPassword.isPending ? 'Sending…' : 'Send reset link'}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
-        <Link to={PATHS.LOGIN} className="underline-offset-4 hover:underline">
+        <Link
+          to={PATHS.LOGIN}
+          className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
+        >
           Back to sign in
         </Link>
       </p>

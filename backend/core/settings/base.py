@@ -157,6 +157,8 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL") == "True"
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = os.getenv("SERVER_EMAIL")
 
+PLATFORM_LOGO_URL = os.getenv("PLATFORM_LOGO_URL", "")
+
 
 TEMPLATES = [
     {

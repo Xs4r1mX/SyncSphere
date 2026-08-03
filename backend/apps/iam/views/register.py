@@ -5,9 +5,6 @@ from rest_framework.views import APIView
 from apps.iam.serializers import RegisterSerializer, UserSerializer
 from apps.iam.services import AuthService
 from apps.common.responses import ApiResponse
-from django.conf import settings
-
-from apps.notification.services.email_service import EmailService
 
 
 class RegisterAPIView(APIView):
@@ -23,7 +20,10 @@ class RegisterAPIView(APIView):
 
             return ApiResponse(
                 success=True,
-                message="User registered successfully.",
+                message=(
+                    "User registered successfully. "
+                    "Please verify your email to activate your account."
+                ),
                 data=UserSerializer(user).data,
                 status_code=status.HTTP_201_CREATED,
             )

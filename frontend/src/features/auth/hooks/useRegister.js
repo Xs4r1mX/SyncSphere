@@ -10,9 +10,14 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: authApi.register,
-    onSuccess: () => {
-      toast.success('Account created. Please verify your email before logging in.');
-      navigate(PATHS.LOGIN, { replace: true });
+    onSuccess: (user) => {
+      toast.success('Account created. Check your email to verify it.');
+      navigate(PATHS.VERIFY_EMAIL, {
+        replace: true,
+        state: {
+          email: user?.email,
+        },
+      });
     },
   });
 }

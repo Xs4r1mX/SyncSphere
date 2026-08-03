@@ -1,6 +1,6 @@
+from django.conf import settings
 from apps.notification.services.template_service import TemplateService
 from apps.notification.services.providers import BrevoProvider
-from django.utils import timezone
 
 
 class EmailService:
@@ -18,10 +18,15 @@ class EmailService:
         Generic email sender.
         """
 
+        template_context = {
+            "platform_logo_url": settings.PLATFORM_LOGO_URL,
+            **(context or {}),
+        }
+
         templates = TemplateService.render_email(
             html_template=html_template,
             text_template=text_template,
-            context=context,
+            context=template_context,
         )
 
         BrevoProvider.send_email(

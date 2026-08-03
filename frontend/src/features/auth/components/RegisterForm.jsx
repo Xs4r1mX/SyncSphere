@@ -1,12 +1,12 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
+import { TriangleAlert } from 'lucide-react';
 
 import { FormField } from './FormField';
 import { useRegister } from '../hooks/useRegister';
 import { registerSchema } from '../validation/registerSchema';
 import { PATHS } from '@/app/routes/paths';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 export function RegisterForm() {
@@ -32,12 +32,6 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-      {registerMutation.error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{registerMutation.error.message}</AlertDescription>
-        </Alert>
-      ) : null}
-
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField
           id="first_name"
@@ -81,13 +75,26 @@ export function RegisterForm() {
         registration={register('password')}
       />
 
+      {registerMutation.error ? (
+        <p
+          role="alert"
+          className="flex items-center gap-1.5 text-sm text-destructive"
+        >
+          <TriangleAlert className="size-4 shrink-0" />
+          <span>{registerMutation.error.message}</span>
+        </p>
+      ) : null}
+
       <Button type="submit" disabled={registerMutation.isPending}>
         {registerMutation.isPending ? 'Creating account…' : 'Create account'}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link to={PATHS.LOGIN} className="underline-offset-4 hover:underline">
+        <Link
+          to={PATHS.LOGIN}
+          className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
+        >
           Sign in
         </Link>
       </p>

@@ -13,7 +13,7 @@ export function RegisterPage() {
       <CardHeader>
         <CardTitle>Create account</CardTitle>
         <CardDescription>
-          Register to manage files across Drive, Dropbox, and more.
+          Get started with SyncSphere.
         </CardDescription>
       </CardHeader>
       <CardContent>
