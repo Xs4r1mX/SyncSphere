@@ -121,6 +121,41 @@
     --sidebar-ring: oklch(0.55 0 0);
 }
 
+/*
+  Sonner injects its stylesheet at runtime, so these selectors are written to
+  outrank its defaults instead of relying on utility classes.
+*/
+[data-sonner-toaster] [data-sonner-toast][data-styled='true'] {
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--card-foreground);
+    box-shadow: 0 1px 2px 0 oklch(0 0 0 / 25%);
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-styled='true']:has([data-close-button]) {
+    padding-right: 40px;
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-title] {
+    color: var(--foreground);
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-description] {
+    color: var(--muted-foreground);
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-styled='true'] [data-close-button] {
+    background: transparent;
+    border-color: transparent;
+    color: var(--muted-foreground);
+}
+
+[data-sonner-toaster] [data-sonner-toast][data-styled='true']:hover [data-close-button]:hover {
+    background: var(--muted);
+    border-color: var(--border);
+    color: var(--foreground);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
