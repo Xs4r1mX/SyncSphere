@@ -56,9 +56,7 @@ export function ForgotPasswordForm() {
           className="flex items-start gap-1.5 text-sm text-foreground"
         >
           <CircleCheck className="mt-0.5 size-4 shrink-0" />
-          <span>
-            A password reset link has been sent if that email is registered.
-          </span>
+          <span>{forgotPassword.data?.message}</span>
         </p>
       ) : null}
 

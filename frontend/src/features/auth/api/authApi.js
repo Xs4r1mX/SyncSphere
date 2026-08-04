@@ -34,8 +34,27 @@ export const refresh = (payload) => unwrap(authService.refresh(payload));
 
 export const me = () => unwrap(authService.me());
 
-export const forgotPassword = (payload) =>
-  unwrap(authService.forgotPassword(payload));
+export const forgotPassword = async (payload) => {
+  try {
+    const response = await authService.forgotPassword(payload);
+    const body = response.data;
+
+    if (body && typeof body.success === 'boolean' && body.success === false) {
+      throw new AppError(body.message || 'Request failed.', {
+        status: response.status,
+        fieldErrors: body.errors,
+        data: body.data,
+      });
+    }
+
+    return {
+      ...(body?.data && typeof body.data === 'object' ? body.data : {}),
+      message: body?.message,
+    };
+  } catch (error) {
+    throw normalizeApiError(error);
+  }
+};
 
 export const resetPassword = (payload) =>
   unwrap(authService.resetPassword(payload));

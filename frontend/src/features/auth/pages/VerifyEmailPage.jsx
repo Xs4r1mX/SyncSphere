@@ -102,20 +102,12 @@ export function VerifyEmailPage() {
         ) : null}
 
         {verifyEmail.isSuccess ? (
-          <div className="grid gap-5">
-            <Alert>
-              <AlertDescription>
-                Email verified successfully
-                {verifyEmail.data?.email ? ` for ${verifyEmail.data.email}` : ''}.
-              </AlertDescription>
-            </Alert>
-            <Link
-              to={PATHS.LOGIN}
-              className={cn(buttonVariants(), 'w-full')}
-            >
-              Continue to sign in
-            </Link>
-          </div>
+          <Link
+            to={PATHS.LOGIN}
+            className={cn(buttonVariants(), 'w-full')}
+          >
+            Continue to sign in
+          </Link>
         ) : null}
 
         {token && verifyEmail.isError ? (

@@ -6,8 +6,10 @@ import authApi from '../api/authApi';
 export function useForgotPassword() {
   return useMutation({
     mutationFn: authApi.forgotPassword,
-    onSuccess: () => {
-      toast.success('If the account exists, a reset link has been sent.');
+    onSuccess: (data) => {
+      if (data?.message) {
+        toast.success(data.message);
+      }
     },
   });
 }
