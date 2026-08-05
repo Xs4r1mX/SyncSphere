@@ -48,6 +48,10 @@ INSTALLED_APPS = [
     'apps.iam',
     'rest_framework_simplejwt.token_blacklist',
     'apps.notification',
+    'apps.cloud',
+    'apps.files',
+    'apps.transfers',
+    'apps.activity',
 ]
 
 MIDDLEWARE = [
@@ -189,6 +193,8 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
 SECURE_TOKEN_BYTES = int(os.getenv("SECURE_TOKEN_BYTES", 32))
 
 PASSWORD_RESET_TOKEN_EXPIRY_MINUTES = int(os.getenv("PASSWORD_RESET_TOKEN_EXPIRY_MINUTES", 15))
+
+CREDENTIALS_ENCRYPTION_KEY = os.getenv("CREDENTIALS_ENCRYPTION_KEY", "")
 
 PASSWORD_RESET_FRONTEND_URL = f"{FRONTEND_URL}/reset-password"
 
