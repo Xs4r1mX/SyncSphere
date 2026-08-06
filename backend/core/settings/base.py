@@ -196,6 +196,25 @@ PASSWORD_RESET_TOKEN_EXPIRY_MINUTES = int(os.getenv("PASSWORD_RESET_TOKEN_EXPIRY
 
 CREDENTIALS_ENCRYPTION_KEY = os.getenv("CREDENTIALS_ENCRYPTION_KEY", "")
 
+GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
+GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
+GOOGLE_OAUTH_REDIRECT_URI = os.getenv("GOOGLE_OAUTH_REDIRECT_URI", "").rstrip("/")
+
+GOOGLE_OAUTH_SCOPES = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "openid",
+]
+
+OAUTH_STATE_EXPIRY_MINUTES = int(os.getenv("OAUTH_STATE_EXPIRY_MINUTES", 10))
+
+CLOUD_OAUTH_SUCCESS_URL = (
+    f"{FRONTEND_URL}{os.getenv('CLOUD_OAUTH_SUCCESS_PATH', '/cloud/connections/success')}"
+)
+CLOUD_OAUTH_ERROR_URL = (
+    f"{FRONTEND_URL}{os.getenv('CLOUD_OAUTH_ERROR_PATH', '/cloud/connections/error')}"
+)
+
 PASSWORD_RESET_FRONTEND_URL = f"{FRONTEND_URL}/reset-password"
 
 EMAIL_VERIFICATION_FRONTEND_URL = f"{FRONTEND_URL}/verify-email"

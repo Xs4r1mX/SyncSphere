@@ -9,12 +9,12 @@ class CloudConfig(AppConfig):
 
     def ready(self):
         from apps.cloud.providers.factory import ProviderFactory
+        from apps.cloud.providers.google_drive import GoogleDriveAdapter
         from apps.cloud.providers.stubs import (
             DropboxStubAdapter,
-            GoogleDriveStubAdapter,
             OneDriveStubAdapter,
         )
 
-        ProviderFactory.register(GoogleDriveStubAdapter)
+        ProviderFactory.register(GoogleDriveAdapter)
         ProviderFactory.register(DropboxStubAdapter)
         ProviderFactory.register(OneDriveStubAdapter)

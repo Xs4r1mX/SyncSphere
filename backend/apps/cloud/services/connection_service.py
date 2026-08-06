@@ -157,3 +157,86 @@ class ConnectionService:
             connection_uuid=connection_uuid,
         )
         return CredentialService.decrypt_payload(connection.credentials_encrypted)
+
+    @staticmethod
+    @transaction.atomic
+    def upsert_oauth_connection(
+        *,
+        user,
+        provider: str,
+        provider_account_id: str,
+        display_name: str,
+        account_email: str = "",
+        credentials: dict[str, Any],
+        scopes: Optional[list[str]] = None,
+        quota_total_bytes: Optional[int] = None,
+        quota_used_bytes: Optional[int] = None,
+    ) -> CloudConnection:
+        if provider not in ProviderType.values:
+            raise InvalidProviderException()
+
+        ProviderFactory.get(provider)
+        encrypted = CredentialService.encrypt_payload(credentials)
+
+        connection, created = CloudConnection.objects.update_or_create(
+            user=user,
+            provider=provider,
+            provider_account_id=provider_account_id,
+            defaults={
+                "display_name": display_name.strip(),
+                "account_email": account_email or "",
+                "credentials_encrypted": encrypted,
+                "status": ConnectionStatus.ACTIVE,
+                "scopes": scopes or [],
+                "quota_total_bytes": quota_total_bytes,
+                "quota_used_bytes": quota_used_bytes,
+            },
+        )
+
+        logger.info(
+            "Cloud connection %s via OAuth",
+            "created" if created else "updated",
+            extra={
+                "user_id": user.id,
+                "connection_uuid": str(connection.uuid),
+                "provider": provider,
+            },
+        )
+        return connection
+
+    @staticmethod
+    @transaction.atomic
+    def unlink_connection(*, user, connection_uuid) -> None:
+        connection = ConnectionService.get_connection(
+            user=user,
+            connection_uuid=connection_uuid,
+        )
+
+        if connection.has_credentials:
+            try:
+                credentials = CredentialService.decrypt_payload(
+                    connection.credentials_encrypted
+                )
+                adapter = ProviderFactory.get(connection.provider)
+                adapter.revoke_credentials(credentials=credentials)
+            except Exception:
+                logger.warning(
+                    "Provider revoke failed during unlink; deleting connection anyway",
+                    extra={
+                        "user_id": user.id,
+                        "connection_uuid": str(connection.uuid),
+                        "provider": connection.provider,
+                    },
+                )
+
+        connection_uuid_str = str(connection.uuid)
+        connection.delete()
+
+        logger.info(
+            "Cloud connection unlinked",
+            extra={
+                "user_id": user.id,
+                "connection_uuid": connection_uuid_str,
+                "provider": connection.provider,
+            },
+        )

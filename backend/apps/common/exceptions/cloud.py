@@ -28,6 +28,11 @@ class ConnectionDisabledException(CloudException):
     default_message = "This cloud connection is disabled."
 
 
+class ConnectionExpiredException(CloudException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    default_message = "Cloud connection credentials have expired."
+
+
 class InvalidProviderException(CloudException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_message = "Unsupported cloud storage provider."
@@ -36,6 +41,31 @@ class InvalidProviderException(CloudException):
 class ProviderNotImplementedException(CloudException):
     status_code = status.HTTP_501_NOT_IMPLEMENTED
     default_message = "This cloud provider is not implemented yet."
+
+
+class ProviderConfigurationException(CloudException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_message = "Cloud provider is not configured correctly."
+
+
+class ProviderAuthException(CloudException):
+    status_code = status.HTTP_502_BAD_GATEWAY
+    default_message = "Cloud provider authentication failed."
+
+
+class OAuthStateInvalidException(CloudException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_message = "Invalid OAuth state."
+
+
+class OAuthStateExpiredException(CloudException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_message = "OAuth state has expired."
+
+
+class OAuthExchangeFailedException(CloudException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_message = "Failed to complete OAuth authorization."
 
 
 class CredentialEncryptionException(CloudException):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.cloud.models import CloudConnection
+from apps.cloud.models import CloudConnection, OAuthState
 
 
 @admin.register(CloudConnection)
@@ -23,6 +23,27 @@ class CloudConnectionAdmin(admin.ModelAdmin):
     readonly_fields = (
         "uuid",
         "credentials_encrypted",
+        "created_at",
+        "updated_at",
+    )
+    ordering = ("-created_at",)
+
+
+@admin.register(OAuthState)
+class OAuthStateAdmin(admin.ModelAdmin):
+    list_display = (
+        "provider",
+        "user",
+        "state",
+        "expires_at",
+        "consumed_at",
+        "created_at",
+    )
+    list_filter = ("provider",)
+    search_fields = ("state", "user__email")
+    readonly_fields = (
+        "uuid",
+        "state",
         "created_at",
         "updated_at",
     )

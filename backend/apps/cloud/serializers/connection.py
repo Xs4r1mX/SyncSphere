@@ -51,3 +51,15 @@ class UpdateConnectionSerializer(serializers.Serializer):
         if not value:
             raise serializers.ValidationError("Display name cannot be empty.")
         return value
+
+
+class ConnectionHealthSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField()
+    status = serializers.CharField()
+    provider = serializers.CharField()
+    display_name = serializers.CharField()
+    account_email = serializers.EmailField()
+    quota_total_bytes = serializers.IntegerField(allow_null=True)
+    quota_used_bytes = serializers.IntegerField(allow_null=True)
+    last_synced_at = serializers.DateTimeField(allow_null=True)
+    is_healthy = serializers.BooleanField()
