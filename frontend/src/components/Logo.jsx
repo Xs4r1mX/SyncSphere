@@ -9,12 +9,12 @@ const sizes = {
   lg: 'h-16',
 };
 
-export function Logo({ size = 'md', className, ...props }) {
+export function Logo({ size, className, ...props }) {
   return (
     <img
       src={LOGO_SRC}
       alt={env.appName}
-      className={cn('w-auto object-contain', sizes[size], className)}
+      className={cn('w-auto object-contain', size ? sizes[size] : null, className)}
       {...props}
     />
   );

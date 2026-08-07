@@ -1,14 +1,13 @@
 import { ChangePasswordForm } from '../components/ChangePasswordForm';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export function SettingsPage() {
   return (
     <div className="grid gap-6">
-      <div className="grid gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Update your account security settings.
-        </p>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Update your account security settings."
+      />
       <section className="grid gap-3">
         <h2 className="text-lg font-medium">Change password</h2>
         <ChangePasswordForm />

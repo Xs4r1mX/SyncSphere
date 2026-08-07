@@ -13,5 +13,4 @@ export { RegisterPage } from './pages/RegisterPage';
 export { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 export { ResetPasswordPage } from './pages/ResetPasswordPage';
 export { VerifyEmailPage } from './pages/VerifyEmailPage';
-export { DashboardPage } from './pages/DashboardPage';
 export { SettingsPage } from './pages/SettingsPage';

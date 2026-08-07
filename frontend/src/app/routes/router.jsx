@@ -6,8 +6,11 @@ import { PublicRoute } from './PublicRoute';
 import { HomeRedirect } from './HomeRedirect';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
+import { ActivityPage } from '@/features/activity';
+import { CloudStoragesPage } from '@/features/cloud';
+import { DashboardPage } from '@/features/dashboard';
+import { TransferHistoryPage } from '@/features/transfers';
 import {
-  DashboardPage,
   ForgotPasswordPage,
   LoginPage,
   RegisterPage,
@@ -43,6 +46,9 @@ export const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           { path: PATHS.DASHBOARD, element: <DashboardPage /> },
+          { path: PATHS.CLOUD_STORAGES, element: <CloudStoragesPage /> },
+          { path: PATHS.TRANSFER_HISTORY, element: <TransferHistoryPage /> },
+          { path: PATHS.ACTIVITY, element: <ActivityPage /> },
           { path: PATHS.SETTINGS, element: <SettingsPage /> },
         ],
       },

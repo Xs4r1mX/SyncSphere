@@ -1,3 +1,5 @@
+import { TooltipProvider } from '@/components/ui/tooltip';
+
 import { ReduxProvider } from './ReduxProvider';
 import { QueryProvider } from './QueryProvider';
 import { ThemeProvider } from './ThemeProvider';
@@ -8,8 +10,10 @@ export function AppProviders({ children }) {
     <ReduxProvider>
       <QueryProvider>
         <ThemeProvider>
-          {children}
-          <ToastProvider />
+          <TooltipProvider>
+            {children}
+            <ToastProvider />
+          </TooltipProvider>
         </ThemeProvider>
       </QueryProvider>
     </ReduxProvider>
