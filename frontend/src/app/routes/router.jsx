@@ -7,7 +7,11 @@ import { HomeRedirect } from './HomeRedirect';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { ActivityPage } from '@/features/activity';
-import { CloudStoragesPage } from '@/features/cloud';
+import {
+  CloudConnectionErrorPage,
+  CloudConnectionSuccessPage,
+  CloudStoragesPage,
+} from '@/features/cloud';
 import { DashboardPage } from '@/features/dashboard';
 import { TransferHistoryPage } from '@/features/transfers';
 import {
@@ -42,6 +46,13 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
+      {
+        element: <AuthLayout />,
+        children: [
+          { path: PATHS.CLOUD_CONNECTION_SUCCESS, element: <CloudConnectionSuccessPage /> },
+          { path: PATHS.CLOUD_CONNECTION_ERROR, element: <CloudConnectionErrorPage /> },
+        ],
+      },
       {
         element: <DashboardLayout />,
         children: [

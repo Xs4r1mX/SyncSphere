@@ -11,6 +11,15 @@ const endpoints = {
     verifyEmail: (token) => `/iam/auth/verify-email/${token}/`,
     resendVerification: '/iam/auth/resend-verification/',
   },
+  cloud: {
+    connections: '/cloud/connections/',
+    connection: (uuid) => `/cloud/connections/${uuid}/`,
+    connectionDisable: (uuid) => `/cloud/connections/${uuid}/disable/`,
+    connectionUnlink: (uuid) => `/cloud/connections/${uuid}/unlink/`,
+    connectionHealth: (uuid) => `/cloud/connections/${uuid}/health/`,
+    providerAuthorize: (provider) => `/cloud/providers/${provider}/authorize/`,
+    providerCallback: (provider) => `/cloud/providers/${provider}/callback/`,
+  },
 };
 
 export default endpoints;

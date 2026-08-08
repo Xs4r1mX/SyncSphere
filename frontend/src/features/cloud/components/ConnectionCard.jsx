@@ -1,5 +1,4 @@
 import { Cloud } from 'lucide-react';
-import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,16 +11,49 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import {
+  formatQuotaLabel,
+  getQuotaPercentage,
+} from '../utils/formatQuota';
 
-function QuotaBar({ used, total }) {
-  const percentage = Math.min(Math.round((used / total) * 100), 100);
+function getStatusVariant(status) {
+  switch (status) {
+    case 'active':
+      return 'secondary';
+    case 'error':
+    case 'expired':
+      return 'destructive';
+    case 'disabled':
+    case 'pending':
+      return 'outline';
+    default:
+      return 'outline';
+  }
+}
+
+function QuotaBar({ connection }) {
+  const percentage = getQuotaPercentage(
+    connection.quota_used_bytes,
+    connection.quota_total_bytes,
+  );
+  const hasQuota =
+    connection.quota_used_bytes != null || connection.quota_total_bytes != null;
+
+  if (!hasQuota) {
+    return (
+      <p className="text-xs text-muted-foreground">Storage quota unavailable</p>
+    );
+  }
 
   return (
     <div className="grid gap-1.5">
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>Storage used</span>
         <span>
-          {used} GB / {total} GB
+          {formatQuotaLabel(
+            connection.quota_used_bytes,
+            connection.quota_total_bytes,
+          )}
         </span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -34,7 +66,9 @@ function QuotaBar({ used, total }) {
   );
 }
 
-export function ConnectionCard({ connection }) {
+export function ConnectionCard({ connection, onDisconnect, isDisconnecting }) {
+  const title = connection.display_name || connection.provider_label;
+
   return (
     <Card>
       <CardHeader>
@@ -44,21 +78,27 @@ export function ConnectionCard({ connection }) {
               <Cloud className="size-5 text-muted-foreground" />
             </div>
             <div>
-              <CardTitle>{connection.provider}</CardTitle>
-              <CardDescription>{connection.email}</CardDescription>
+              <CardTitle>{title}</CardTitle>
+              <CardDescription>
+                {connection.account_email || connection.provider_label}
+              </CardDescription>
             </div>
           </div>
-          <Badge variant="secondary">{connection.status}</Badge>
+          <Badge variant={getStatusVariant(connection.status)}>
+            {connection.status_label}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent>
-        <QuotaBar used={connection.quotaUsed} total={connection.quotaTotal} />
+        <QuotaBar connection={connection} />
       </CardContent>
       <CardFooter className="gap-2">
-        <Button variant="outline" size="sm" onClick={() => toast.info('Coming soon')}>
-          Manage
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => toast.info('Coming soon')}>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={isDisconnecting}
+          onClick={() => onDisconnect(connection.uuid)}
+        >
           Disconnect
         </Button>
       </CardFooter>
@@ -66,7 +106,7 @@ export function ConnectionCard({ connection }) {
   );
 }
 
-export function ProviderCard({ provider }) {
+export function ProviderCard({ provider, onConnect, isConnecting }) {
   return (
     <Card className={cn(!provider.available && 'opacity-80')}>
       <CardHeader>
@@ -81,10 +121,10 @@ export function ProviderCard({ provider }) {
       <CardFooter>
         <Button
           size="sm"
-          disabled={!provider.available}
-          onClick={() => toast.info('Cloud connection will be available soon.')}
+          disabled={!provider.available || isConnecting}
+          onClick={() => onConnect(provider.id)}
         >
-          Connect
+          {isConnecting ? 'Connecting…' : 'Connect'}
         </Button>
       </CardFooter>
     </Card>

@@ -1,7 +1,7 @@
 import { Plus } from 'lucide-react';
-import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/layout/PageHeader';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,11 +10,41 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ConnectionCard, ProviderCard } from '../components/ConnectionCard';
-import { mockConnections, mockProviders } from '../data/mockConnections';
+import { cloudProviders } from '../constants/providers';
+import { useCloudConnections } from '../hooks/useCloudConnections';
+import { useConnectProvider } from '../hooks/useConnectProvider';
+import { useUnlinkConnection } from '../hooks/useUnlinkConnection';
+
+function ConnectionsSkeleton() {
+  return (
+    <section className="grid gap-4 md:grid-cols-2">
+      {[0, 1].map((item) => (
+        <Card key={item}>
+          <CardHeader>
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-56" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-2 w-full" />
+          </CardContent>
+        </Card>
+      ))}
+    </section>
+  );
+}
 
 export function CloudStoragesPage() {
-  const hasConnections = mockConnections.length > 0;
+  const connectionsQuery = useCloudConnections();
+  const connectProvider = useConnectProvider();
+  const unlinkConnection = useUnlinkConnection();
+
+  const connections = connectionsQuery.data ?? [];
+  const hasConnections = connections.length > 0;
+  const connectingProviderId = connectProvider.isPending
+    ? connectProvider.variables
+    : null;
 
   return (
     <div className="grid gap-6">
@@ -22,17 +52,38 @@ export function CloudStoragesPage() {
         title="Cloud Storages"
         description="Manage your connected cloud accounts."
         action={
-          <Button onClick={() => toast.info('Cloud connection will be available soon.')}>
+          <Button
+            disabled={connectProvider.isPending}
+            onClick={() => connectProvider.mutate('google_drive')}
+          >
             <Plus />
             Connect storage
           </Button>
         }
       />
 
-      {hasConnections ? (
+      {connectionsQuery.isError ? (
+        <Alert variant="destructive">
+          <AlertDescription>
+            {connectionsQuery.error.message || 'Could not load cloud connections.'}
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {connectionsQuery.isLoading ? (
+        <ConnectionsSkeleton />
+      ) : hasConnections ? (
         <section className="grid gap-4 md:grid-cols-2">
-          {mockConnections.map((connection) => (
-            <ConnectionCard key={connection.id} connection={connection} />
+          {connections.map((connection) => (
+            <ConnectionCard
+              key={connection.uuid}
+              connection={connection}
+              isDisconnecting={
+                unlinkConnection.isPending &&
+                unlinkConnection.variables === connection.uuid
+              }
+              onDisconnect={(uuid) => unlinkConnection.mutate(uuid)}
+            />
           ))}
         </section>
       ) : (
@@ -44,7 +95,10 @@ export function CloudStoragesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => toast.info('Cloud connection will be available soon.')}>
+            <Button
+              disabled={connectProvider.isPending}
+              onClick={() => connectProvider.mutate('google_drive')}
+            >
               <Plus />
               Connect your first storage
             </Button>
@@ -60,8 +114,13 @@ export function CloudStoragesPage() {
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          {mockProviders.map((provider) => (
-            <ProviderCard key={provider.id} provider={provider} />
+          {cloudProviders.map((provider) => (
+            <ProviderCard
+              key={provider.id}
+              provider={provider}
+              isConnecting={connectingProviderId === provider.id}
+              onConnect={(providerId) => connectProvider.mutate(providerId)}
+            />
           ))}
         </div>
       </section>
