@@ -1,0 +1,51 @@
+import { useRef } from 'react';
+import { FolderPlus, Trash2, Upload } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+
+export function FileExplorerToolbar({
+  showTrashed,
+  onToggleTrashed,
+  onCreateFolder,
+  onUpload,
+}) {
+  const fileInputRef = useRef(null);
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="secondary"
+          disabled={showTrashed}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload />
+          Upload
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={() => {
+            onUpload();
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
+          }}
+        />
+        <Button variant="secondary" disabled={showTrashed} onClick={onCreateFolder}>
+          <FolderPlus />
+          New folder
+        </Button>
+      </div>
+
+      <Button
+        variant={showTrashed ? 'default' : 'outline'}
+        onClick={() => onToggleTrashed(!showTrashed)}
+      >
+        <Trash2 />
+        {showTrashed ? 'Viewing trash' : 'Trash'}
+      </Button>
+    </div>
+  );
+}

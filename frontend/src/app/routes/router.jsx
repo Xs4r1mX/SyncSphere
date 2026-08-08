@@ -13,6 +13,7 @@ import {
   CloudStoragesPage,
 } from '@/features/cloud';
 import { DashboardPage } from '@/features/dashboard';
+import { FileExplorerPage } from '@/features/files';
 import { TransferHistoryPage } from '@/features/transfers';
 import {
   ForgotPasswordPage,
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
         children: [
           { path: PATHS.DASHBOARD, element: <DashboardPage /> },
           { path: PATHS.CLOUD_STORAGES, element: <CloudStoragesPage /> },
+          { path: PATHS.CLOUD_FILES, element: <FileExplorerPage /> },
           { path: PATHS.TRANSFER_HISTORY, element: <TransferHistoryPage /> },
           { path: PATHS.ACTIVITY, element: <ActivityPage /> },
           { path: PATHS.SETTINGS, element: <SettingsPage /> },

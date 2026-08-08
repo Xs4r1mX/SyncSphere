@@ -1,5 +1,7 @@
 import { Cloud } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
+import { PATHS } from '@/app/routes/paths';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -93,6 +95,14 @@ export function ConnectionCard({ connection, onDisconnect, isDisconnecting }) {
         <QuotaBar connection={connection} />
       </CardContent>
       <CardFooter className="gap-2">
+        {connection.status === 'active' ? (
+          <Button
+            size="sm"
+            render={<Link to={PATHS.cloudFiles(connection.uuid)} />}
+          >
+            Browse files
+          </Button>
+        ) : null}
         <Button
           variant="ghost"
           size="sm"
