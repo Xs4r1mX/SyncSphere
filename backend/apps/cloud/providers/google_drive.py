@@ -88,6 +88,8 @@ class GoogleDriveAdapter(CloudProviderAdapter):
         token_expiry = payload.get("token_expiry")
         if token_expiry:
             expiry = datetime.fromisoformat(token_expiry)
+            if expiry.tzinfo is not None:
+                expiry = expiry.astimezone(dt_timezone.utc).replace(tzinfo=None)
 
         return Credentials(
             token=payload.get("access_token"),
@@ -103,7 +105,7 @@ class GoogleDriveAdapter(CloudProviderAdapter):
         flow = self._build_flow(redirect_uri=redirect_uri)
         authorization_url, _ = flow.authorization_url(
             access_type="offline",
-            include_granted_scopes=True,
+            include_granted_scopes="true",
             prompt="consent",
             state=state,
         )
@@ -115,12 +117,10 @@ class GoogleDriveAdapter(CloudProviderAdapter):
             flow.fetch_token(code=code)
         except Exception as exc:
             logger.warning(
-                "Google OAuth code exchange failed",
+                f"Google OAuth code exchange failed with error: {str(exc)}",
                 extra={"provider": self.provider_type},
             )
-            raise ProviderAuthException(
-                "Failed to exchange authorization code with Google."
-            ) from exc
+            raise ProviderAuthException(f"Failed to exchange authorization code with Google: {exc}") from exc
 
         credentials = flow.credentials
         payload = self._credentials_to_payload(credentials)
