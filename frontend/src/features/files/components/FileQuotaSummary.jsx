@@ -3,11 +3,25 @@ import {
   getQuotaPercentage,
 } from '@/features/cloud/utils/formatQuota';
 
-export function FileQuotaSummary({ connection }) {
-  const percentage = getQuotaPercentage(
-    connection.quota_used_bytes,
-    connection.quota_total_bytes,
-  );
+export function FileQuotaSummary({ quotaUsedBytes, quotaTotalBytes, isLoading }) {
+  if (isLoading) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="h-2 animate-pulse rounded-full bg-muted" />
+      </div>
+    );
+  }
+
+  const percentage = getQuotaPercentage(quotaUsedBytes, quotaTotalBytes);
+  const hasQuota = quotaUsedBytes != null || quotaTotalBytes != null;
+
+  if (!hasQuota) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-4">
+        <p className="text-sm text-muted-foreground">Storage quota unavailable</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
@@ -15,10 +29,7 @@ export function FileQuotaSummary({ connection }) {
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">Storage used</span>
           <span className="text-muted-foreground">
-            {formatQuotaLabel(
-              connection.quota_used_bytes,
-              connection.quota_total_bytes,
-            )}
+            {formatQuotaLabel(quotaUsedBytes, quotaTotalBytes)}
           </span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-muted">

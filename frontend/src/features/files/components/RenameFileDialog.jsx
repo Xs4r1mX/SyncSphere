@@ -12,7 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export function RenameFileDialog({ open, onOpenChange, item, onSubmit }) {
+export function RenameFileDialog({ open, onOpenChange, item, onSubmit, isSubmitting }) {
   const [name, setName] = useState(item?.name ?? '');
 
   useEffect(() => {
@@ -28,9 +28,7 @@ export function RenameFileDialog({ open, onOpenChange, item, onSubmit }) {
       return;
     }
 
-    if (onSubmit(item.provider_item_id, name)) {
-      onOpenChange(false);
-    }
+    onSubmit(item.provider_item_id, name.trim());
   };
 
   return (
@@ -56,8 +54,11 @@ export function RenameFileDialog({ open, onOpenChange, item, onSubmit }) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || name.trim() === item?.name}>
-              Save
+            <Button
+              type="submit"
+              disabled={!name.trim() || name.trim() === item?.name || isSubmitting}
+            >
+              {isSubmitting ? 'Saving…' : 'Save'}
             </Button>
           </DialogFooter>
         </form>

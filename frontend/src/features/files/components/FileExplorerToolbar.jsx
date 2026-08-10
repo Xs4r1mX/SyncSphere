@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export function FileExplorerToolbar({
   showTrashed,
+  isUploading,
   onToggleTrashed,
   onCreateFolder,
   onUpload,
@@ -16,24 +17,33 @@ export function FileExplorerToolbar({
       <div className="flex flex-wrap gap-2">
         <Button
           variant="secondary"
-          disabled={showTrashed}
+          disabled={showTrashed || isUploading}
           onClick={() => fileInputRef.current?.click()}
         >
           <Upload />
-          Upload
+          {isUploading ? 'Uploading…' : 'Upload'}
         </Button>
         <input
           ref={fileInputRef}
           type="file"
           className="hidden"
-          onChange={() => {
-            onUpload();
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+
+            if (file) {
+              onUpload(file);
+            }
+
             if (fileInputRef.current) {
               fileInputRef.current.value = '';
             }
           }}
         />
-        <Button variant="secondary" disabled={showTrashed} onClick={onCreateFolder}>
+        <Button
+          variant="secondary"
+          disabled={showTrashed}
+          onClick={onCreateFolder}
+        >
           <FolderPlus />
           New folder
         </Button>

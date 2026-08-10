@@ -20,6 +20,19 @@ const endpoints = {
     providerAuthorize: (provider) => `/cloud/providers/${provider}/authorize/`,
     providerCallback: (provider) => `/cloud/providers/${provider}/callback/`,
   },
+  files: {
+    list: (uuid) => `/files/${uuid}/`,
+    quota: (uuid) => `/files/${uuid}/quota/`,
+    breadcrumb: (uuid) => `/files/${uuid}/breadcrumb/`,
+    folders: (uuid) => `/files/${uuid}/folders/`,
+    upload: (uuid) => `/files/${uuid}/upload/`,
+    item: (uuid, itemId) => `/files/${uuid}/${encodeURIComponent(itemId)}/`,
+    download: (uuid, itemId) =>
+      `/files/${uuid}/${encodeURIComponent(itemId)}/download/`,
+    copy: (uuid, itemId) => `/files/${uuid}/${encodeURIComponent(itemId)}/copy/`,
+    restore: (uuid, itemId) =>
+      `/files/${uuid}/${encodeURIComponent(itemId)}/restore/`,
+  },
 };
 
 export default endpoints;

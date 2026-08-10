@@ -48,7 +48,7 @@ export function FileRowActions({
         ) : null}
 
         {!showTrashed && !item.is_folder ? (
-          <DropdownMenuItem onClick={onDownload}>
+          <DropdownMenuItem onClick={() => onDownload(item)}>
             <Download />
             Download
           </DropdownMenuItem>
@@ -60,7 +60,7 @@ export function FileRowActions({
               <Pencil />
               Rename
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onMove}>
+            <DropdownMenuItem onClick={() => onMove(item)}>
               <FolderInput />
               Move
             </DropdownMenuItem>

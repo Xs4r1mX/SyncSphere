@@ -11,20 +11,18 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getFolderOptions } from '../data/mockFileExplorer';
 import { ROOT_ID } from '../constants/fileTypes';
 
-export function CopyFileDialog({ open, onOpenChange, item, allItems, onSubmit }) {
+export function CopyFileDialog({
+  open,
+  onOpenChange,
+  item,
+  folderOptions,
+  onSubmit,
+  isSubmitting,
+}) {
   const [name, setName] = useState('');
   const [parentId, setParentId] = useState(ROOT_ID);
-
-  const folderOptions = [
-    { provider_item_id: ROOT_ID, name: 'My Drive' },
-    ...getFolderOptions(allItems).map((folder) => ({
-      provider_item_id: folder.provider_item_id,
-      name: folder.name,
-    })),
-  ];
 
   useEffect(() => {
     if (open && item) {
@@ -35,8 +33,7 @@ export function CopyFileDialog({ open, onOpenChange, item, allItems, onSubmit })
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit();
-    onOpenChange(false);
+    onSubmit({ name: name.trim(), parentId });
   };
 
   return (
@@ -78,8 +75,8 @@ export function CopyFileDialog({ open, onOpenChange, item, allItems, onSubmit })
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim()}>
-              Copy
+            <Button type="submit" disabled={!name.trim() || isSubmitting}>
+              {isSubmitting ? 'Copying…' : 'Copy'}
             </Button>
           </DialogFooter>
         </form>

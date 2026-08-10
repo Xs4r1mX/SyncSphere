@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -12,16 +12,18 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export function CreateFolderDialog({ open, onOpenChange, onSubmit }) {
+export function CreateFolderDialog({ open, onOpenChange, onSubmit, isSubmitting }) {
   const [name, setName] = useState('');
+
+  useEffect(() => {
+    if (!open) {
+      setName('');
+    }
+  }, [open]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
-    if (onSubmit(name)) {
-      setName('');
-      onOpenChange(false);
-    }
+    onSubmit(name.trim());
   };
 
   return (
@@ -48,8 +50,8 @@ export function CreateFolderDialog({ open, onOpenChange, onSubmit }) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim()}>
-              Create
+            <Button type="submit" disabled={!name.trim() || isSubmitting}>
+              {isSubmitting ? 'Creating…' : 'Create'}
             </Button>
           </DialogFooter>
         </form>
