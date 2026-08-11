@@ -63,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.common.middleware.request_id.RequestIdMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -234,3 +235,22 @@ FILE_LIST_DEFAULT_PAGE_SIZE = int(
     os.getenv("FILE_LIST_DEFAULT_PAGE_SIZE", 50)
 )
 FILE_LIST_MAX_PAGE_SIZE = int(os.getenv("FILE_LIST_MAX_PAGE_SIZE", 100))
+
+# Celery (Phase 4) — broker/result via Redis; single default queue.
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = os.getenv(
+    "CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/1"
+)
+CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", "False") == "True"
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_TRACK_STARTED = True
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_DEFAULT_QUEUE = "default"
+# Extensible later, e.g. {"apps.transfers.tasks.*": {"queue": "transfers"}}
+CELERY_TASK_ROUTES: dict = {}
+CELERY_WORKER_HEALTH_TIMEOUT_SECONDS = float(
+    os.getenv("CELERY_WORKER_HEALTH_TIMEOUT_SECONDS", "2")
+)
