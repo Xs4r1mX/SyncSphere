@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCloudConnections } from '@/features/cloud/hooks/useCloudConnections';
+import { formatConnectionLabel } from '@/features/cloud/utils/formatConnectionLabel';
 import { formatFileDate } from '@/features/files/utils/formatFileDate';
 import { formatFileSize } from '@/features/files/utils/formatFileSize';
 import { TransferProgressBar } from '../components/TransferProgressBar';
@@ -28,11 +29,7 @@ import { useCancelTransfer } from '../hooks/useTransferMutations';
 
 function connectionLabel(connections, uuid) {
   const connection = connections.find((item) => item.uuid === uuid);
-  if (!connection) {
-    return 'Unknown storage';
-  }
-
-  return connection.display_name || connection.provider_label || connection.account_email;
+  return formatConnectionLabel(connection);
 }
 
 export function TransferDetailPage() {

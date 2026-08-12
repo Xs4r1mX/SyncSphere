@@ -12,7 +12,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { SelectField } from '@/components/ui/select';
 import { useCloudConnections } from '@/features/cloud/hooks/useCloudConnections';
+import { formatConnectionLabel } from '@/features/cloud/utils/formatConnectionLabel';
 import { ROOT_ID } from '@/features/files/constants/fileTypes';
 import { useFileList } from '@/features/files/hooks/useFileList';
 import { useCreateTransfer } from '../hooks/useTransferMutations';
@@ -116,69 +118,61 @@ export function StartTransferDialog({
             <div className="grid gap-4 py-2">
               <div className="grid gap-2">
                 <Label htmlFor="transfer-operation">Operation</Label>
-                <select
+                <SelectField
                   id="transfer-operation"
-                  className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
                   value={mode}
-                  onChange={(event) => setMode(event.target.value)}
-                >
-                  <option value="copy">Copy</option>
-                  <option value="move">Move</option>
-                </select>
+                  onValueChange={setMode}
+                  options={[
+                    { value: 'copy', label: 'Copy' },
+                    { value: 'move', label: 'Move' },
+                  ]}
+                />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="transfer-destination">Destination storage</Label>
-                <select
+                <SelectField
                   id="transfer-destination"
-                  className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
                   value={destConnectionUuid}
-                  onChange={(event) => {
-                    setDestConnectionUuid(event.target.value);
+                  onValueChange={(nextUuid) => {
+                    setDestConnectionUuid(nextUuid);
                     setDestParentId(ROOT_ID);
                   }}
-                >
-                  {destConnections.map((connection) => (
-                    <option key={connection.uuid} value={connection.uuid}>
-                      {connection.display_name || connection.provider_label}
-                      {connection.account_email ? ` (${connection.account_email})` : ''}
-                    </option>
-                  ))}
-                </select>
+                  options={destConnections.map((connection) => ({
+                    value: connection.uuid,
+                    label: formatConnectionLabel(connection),
+                  }))}
+                />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="transfer-folder">Destination folder</Label>
-                <select
+                <SelectField
                   id="transfer-folder"
-                  className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
                   value={destParentId}
-                  onChange={(event) => setDestParentId(event.target.value)}
+                  onValueChange={setDestParentId}
                   disabled={destFoldersQuery.isLoading}
-                >
-                  <option value={ROOT_ID}>My Drive (root)</option>
-                  {destFolders.map((folder) => (
-                    <option
-                      key={folder.provider_item_id}
-                      value={folder.provider_item_id}
-                    >
-                      {folder.name}
-                    </option>
-                  ))}
-                </select>
+                  options={[
+                    { value: ROOT_ID, label: 'My Drive (root)' },
+                    ...destFolders.map((folder) => ({
+                      value: folder.provider_item_id,
+                      label: folder.name,
+                    })),
+                  ]}
+                />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="transfer-conflict">If a file already exists</Label>
-                <select
+                <SelectField
                   id="transfer-conflict"
-                  className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
                   value={conflictPolicy}
-                  onChange={(event) => setConflictPolicy(event.target.value)}
-                >
-                  <option value="reject">Stop and report a conflict</option>
-                  <option value="rename">Rename the copy</option>
-                </select>
+                  onValueChange={setConflictPolicy}
+                  options={[
+                    { value: 'reject', label: 'Stop and report a conflict' },
+                    { value: 'rename', label: 'Rename the copy' },
+                  ]}
+                />
               </div>
             </div>
           )}

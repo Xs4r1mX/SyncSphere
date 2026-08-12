@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { SelectField } from '@/components/ui/select';
 import { ROOT_ID } from '../constants/fileTypes';
 
 export function MoveFileDialog({
@@ -45,18 +46,15 @@ export function MoveFileDialog({
           </DialogHeader>
           <div className="grid gap-2 py-2">
             <Label htmlFor="move-destination">Destination folder</Label>
-            <select
+            <SelectField
               id="move-destination"
-              className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
               value={parentId}
-              onChange={(event) => setParentId(event.target.value)}
-            >
-              {folderOptions.map((folder) => (
-                <option key={folder.provider_item_id} value={folder.provider_item_id}>
-                  {folder.name}
-                </option>
-              ))}
-            </select>
+              onValueChange={setParentId}
+              options={folderOptions.map((folder) => ({
+                value: folder.provider_item_id,
+                label: folder.name,
+              }))}
+            />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { formatConnectionLabel } from '../utils/formatConnectionLabel';
 import {
   formatQuotaLabel,
   getQuotaPercentage,
@@ -86,7 +87,12 @@ export function ConnectionCard({
   isCheckingHealth,
   isEnabling,
 }) {
-  const title = connection.display_name || connection.provider_label;
+  const title = formatConnectionLabel(connection, { includeEmail: false });
+  const subtitle =
+    connection.account_email &&
+    connection.account_email.toLowerCase() !== title.toLowerCase()
+      ? connection.account_email
+      : connection.provider_label;
 
   return (
     <Card>
@@ -99,7 +105,7 @@ export function ConnectionCard({
             <div>
               <CardTitle>{title}</CardTitle>
               <CardDescription>
-                {connection.account_email || connection.provider_label}
+                {subtitle || connection.provider_label}
               </CardDescription>
             </div>
           </div>

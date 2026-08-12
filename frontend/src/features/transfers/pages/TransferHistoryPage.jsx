@@ -14,8 +14,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { SelectField } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCloudConnections } from '@/features/cloud/hooks/useCloudConnections';
+import { formatConnectionLabel } from '@/features/cloud/utils/formatConnectionLabel';
 import { formatFileDate } from '@/features/files/utils/formatFileDate';
 import { TransferProgressBar } from '../components/TransferProgressBar';
 import { TransferStatusBadge } from '../components/TransferStatusBadge';
@@ -29,11 +31,7 @@ import { useTransfers } from '../hooks/useTransfers';
 
 function connectionLabel(connections, uuid) {
   const connection = connections.find((item) => item.uuid === uuid);
-  if (!connection) {
-    return 'Unknown storage';
-  }
-
-  return connection.display_name || connection.provider_label || connection.account_email;
+  return formatConnectionLabel(connection);
 }
 
 function TransfersSkeleton() {
@@ -101,18 +99,16 @@ export function TransferHistoryPage() {
               aria-label="Search transfers"
             />
           </div>
-          <select
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          <SelectField
+            className="sm:w-48"
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
+            onValueChange={setStatusFilter}
             aria-label="Filter by status"
-          >
-            {STATUS_FILTER_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            options={STATUS_FILTER_OPTIONS.map((option) => ({
+              value: option.value,
+              label: option.label,
+            }))}
+          />
         </CardContent>
       </Card>
 
