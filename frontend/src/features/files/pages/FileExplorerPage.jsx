@@ -19,6 +19,7 @@ import { FileListTable } from '../components/FileListTable';
 import { FileQuotaSummary } from '../components/FileQuotaSummary';
 import { MoveFileDialog } from '../components/MoveFileDialog';
 import { RenameFileDialog } from '../components/RenameFileDialog';
+import { StartTransferDialog } from '@/features/transfers/components/StartTransferDialog';
 import { MAX_UPLOAD_BYTES, ROOT_ID } from '../constants/fileTypes';
 import { useFileBreadcrumb } from '../hooks/useFileBreadcrumb';
 import { useFileList } from '../hooks/useFileList';
@@ -51,6 +52,8 @@ export function FileExplorerPage() {
   const [deleteItemState, setDeleteItemState] = useState(null);
   const [copyItemState, setCopyItemState] = useState(null);
   const [moveItemState, setMoveItemState] = useState(null);
+  const [transferItemState, setTransferItemState] = useState(null);
+  const [permanentDeleteItem, setPermanentDeleteItem] = useState(null);
 
   const connectionQuery = useQuery({
     queryKey: cloudQueryKeys.connection(connectionUuid),
@@ -209,6 +212,8 @@ export function FileExplorerPage() {
         onCopy={setCopyItemState}
         onDownload={(item) => downloadFile.mutate(item.provider_item_id)}
         onMove={setMoveItemState}
+        onTransfer={setTransferItemState}
+        onPermanentDelete={setPermanentDeleteItem}
       />
 
       {fileListQuery.hasNextPage ? (
@@ -265,6 +270,20 @@ export function FileExplorerPage() {
         }}
       />
 
+      <DeleteFileConfirmDialog
+        open={Boolean(permanentDeleteItem)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPermanentDeleteItem(null);
+          }
+        }}
+        item={permanentDeleteItem}
+        permanent
+        onConfirm={(itemId) => {
+          deleteFile.mutate({ itemId, permanent: true });
+        }}
+      />
+
       <CopyFileDialog
         open={Boolean(copyItemState)}
         onOpenChange={(open) => {
@@ -318,6 +337,17 @@ export function FileExplorerPage() {
             },
           );
         }}
+      />
+
+      <StartTransferDialog
+        open={Boolean(transferItemState)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setTransferItemState(null);
+          }
+        }}
+        item={transferItemState}
+        sourceConnectionUuid={connectionUuid}
       />
     </div>
   );

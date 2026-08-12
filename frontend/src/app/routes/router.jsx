@@ -14,7 +14,7 @@ import {
 } from '@/features/cloud';
 import { DashboardPage } from '@/features/dashboard';
 import { FileExplorerPage } from '@/features/files';
-import { TransferHistoryPage } from '@/features/transfers';
+import { TransferDetailPage, TransferHistoryPage } from '@/features/transfers';
 import {
   ForgotPasswordPage,
   LoginPage,
@@ -61,6 +61,7 @@ export const router = createBrowserRouter([
           { path: PATHS.CLOUD_STORAGES, element: <CloudStoragesPage /> },
           { path: PATHS.CLOUD_FILES, element: <FileExplorerPage /> },
           { path: PATHS.TRANSFER_HISTORY, element: <TransferHistoryPage /> },
+          { path: PATHS.TRANSFER_DETAIL, element: <TransferDetailPage /> },
           { path: PATHS.ACTIVITY, element: <ActivityPage /> },
           { path: PATHS.SETTINGS, element: <SettingsPage /> },
         ],

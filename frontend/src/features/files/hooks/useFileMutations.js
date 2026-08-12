@@ -88,9 +88,11 @@ export function useDeleteFile(connectionUuid) {
   return useMutation({
     mutationFn: ({ itemId, permanent = false }) =>
       fileApi.deleteItem(connectionUuid, itemId, { permanent }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       invalidateFileQueries(queryClient, connectionUuid);
-      toast.success('Moved to trash.');
+      toast.success(
+        variables.permanent ? 'Item permanently deleted.' : 'Moved to trash.',
+      );
     },
     onError: (error) => {
       toast.error(error.message || 'Could not delete item.');

@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react';
+import { useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -12,8 +13,16 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConnectionCard, ProviderCard } from '../components/ConnectionCard';
+import { DisableConnectionDialog } from '../components/DisableConnectionDialog';
+import { RenameConnectionDialog } from '../components/RenameConnectionDialog';
 import { cloudProviders } from '../constants/providers';
 import { useCloudConnections } from '../hooks/useCloudConnections';
+import {
+  useCheckConnectionHealth,
+  useDisableConnection,
+  useEnableConnection,
+  useUpdateConnection,
+} from '../hooks/useConnectionActions';
 import { useConnectProvider } from '../hooks/useConnectProvider';
 import { useUnlinkConnection } from '../hooks/useUnlinkConnection';
 
@@ -39,6 +48,13 @@ export function CloudStoragesPage() {
   const connectionsQuery = useCloudConnections();
   const connectProvider = useConnectProvider();
   const unlinkConnection = useUnlinkConnection();
+  const updateConnection = useUpdateConnection();
+  const disableConnection = useDisableConnection();
+  const enableConnection = useEnableConnection();
+  const checkHealth = useCheckConnectionHealth();
+
+  const [renameConnection, setRenameConnection] = useState(null);
+  const [disableTarget, setDisableTarget] = useState(null);
 
   const connections = connectionsQuery.data ?? [];
   const hasConnections = connections.length > 0;
@@ -82,7 +98,18 @@ export function CloudStoragesPage() {
                 unlinkConnection.isPending &&
                 unlinkConnection.variables === connection.uuid
               }
+              isCheckingHealth={
+                checkHealth.isPending && checkHealth.variables === connection.uuid
+              }
+              isEnabling={
+                enableConnection.isPending &&
+                enableConnection.variables === connection.uuid
+              }
               onDisconnect={(uuid) => unlinkConnection.mutate(uuid)}
+              onRename={setRenameConnection}
+              onDisable={setDisableTarget}
+              onEnable={(uuid) => enableConnection.mutate(uuid)}
+              onHealthCheck={(uuid) => checkHealth.mutate(uuid)}
             />
           ))}
         </section>
@@ -124,6 +151,38 @@ export function CloudStoragesPage() {
           ))}
         </div>
       </section>
+
+      <RenameConnectionDialog
+        open={Boolean(renameConnection)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRenameConnection(null);
+          }
+        }}
+        connection={renameConnection}
+        isSubmitting={updateConnection.isPending}
+        onSubmit={(displayName) => {
+          if (!renameConnection) {
+            return;
+          }
+
+          updateConnection.mutate(
+            { uuid: renameConnection.uuid, displayName },
+            { onSuccess: () => setRenameConnection(null) },
+          );
+        }}
+      />
+
+      <DisableConnectionDialog
+        open={Boolean(disableTarget)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDisableTarget(null);
+          }
+        }}
+        connection={disableTarget}
+        onConfirm={(uuid) => disableConnection.mutate(uuid)}
+      />
     </div>
   );
 }

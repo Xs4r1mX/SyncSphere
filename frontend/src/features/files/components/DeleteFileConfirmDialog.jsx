@@ -9,15 +9,24 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-export function DeleteFileConfirmDialog({ open, onOpenChange, item, onConfirm }) {
+export function DeleteFileConfirmDialog({
+  open,
+  onOpenChange,
+  item,
+  permanent = false,
+  onConfirm,
+}) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Move to trash?</AlertDialogTitle>
+          <AlertDialogTitle>
+            {permanent ? 'Delete permanently?' : 'Move to trash?'}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            &ldquo;{item?.name}&rdquo; will be moved to trash. You can restore it later
-            from the trash view.
+            {permanent
+              ? `“${item?.name}” will be permanently deleted and cannot be restored.`
+              : `“${item?.name}” will be moved to trash. You can restore it later from the trash view.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -31,7 +40,7 @@ export function DeleteFileConfirmDialog({ open, onOpenChange, item, onConfirm })
               onOpenChange(false);
             }}
           >
-            Move to trash
+            {permanent ? 'Delete permanently' : 'Move to trash'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

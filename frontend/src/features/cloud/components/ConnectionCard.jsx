@@ -1,4 +1,4 @@
-import { Cloud } from 'lucide-react';
+import { Cloud, MoreHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { PATHS } from '@/app/routes/paths';
@@ -12,6 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import {
   formatQuotaLabel,
@@ -68,7 +75,17 @@ function QuotaBar({ connection }) {
   );
 }
 
-export function ConnectionCard({ connection, onDisconnect, isDisconnecting }) {
+export function ConnectionCard({
+  connection,
+  onDisconnect,
+  onRename,
+  onDisable,
+  onEnable,
+  onHealthCheck,
+  isDisconnecting,
+  isCheckingHealth,
+  isEnabling,
+}) {
   const title = connection.display_name || connection.provider_label;
 
   return (
@@ -103,14 +120,51 @@ export function ConnectionCard({ connection, onDisconnect, isDisconnecting }) {
             Browse files
           </Button>
         ) : null}
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={isDisconnecting}
-          onClick={() => onDisconnect(connection.uuid)}
-        >
-          Disconnect
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="outline"
+                size="icon-sm"
+                aria-label={`More actions for ${title}`}
+              />
+            }
+          >
+            <MoreHorizontal />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onRename(connection)}>
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isCheckingHealth}
+              onClick={() => onHealthCheck(connection.uuid)}
+            >
+              {isCheckingHealth ? 'Checking…' : 'Check health'}
+            </DropdownMenuItem>
+            {connection.status === 'active' ? (
+              <DropdownMenuItem onClick={() => onDisable(connection)}>
+                Disable
+              </DropdownMenuItem>
+            ) : null}
+            {connection.status === 'disabled' ? (
+              <DropdownMenuItem
+                disabled={isEnabling}
+                onClick={() => onEnable(connection.uuid)}
+              >
+                {isEnabling ? 'Enabling…' : 'Enable'}
+              </DropdownMenuItem>
+            ) : null}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              disabled={isDisconnecting}
+              onClick={() => onDisconnect(connection.uuid)}
+            >
+              Disconnect
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardFooter>
     </Card>
   );

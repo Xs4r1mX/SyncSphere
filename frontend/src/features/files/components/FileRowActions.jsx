@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Copy,
   Download,
   ExternalLink,
@@ -27,6 +28,8 @@ export function FileRowActions({
   onCopy,
   onDownload,
   onMove,
+  onTransfer,
+  onPermanentDelete,
 }) {
   return (
     <DropdownMenu>
@@ -68,6 +71,10 @@ export function FileRowActions({
               <Copy />
               Copy
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onTransfer(item)}>
+              <ArrowLeftRight />
+              Transfer to another cloud
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={() => onDelete(item)}>
               <Trash2 />
@@ -75,10 +82,16 @@ export function FileRowActions({
             </DropdownMenuItem>
           </>
         ) : (
-          <DropdownMenuItem onClick={() => onRestore(item.provider_item_id)}>
-            <RotateCcw />
-            Restore
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem onClick={() => onRestore(item.provider_item_id)}>
+              <RotateCcw />
+              Restore
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onClick={() => onPermanentDelete(item)}>
+              <Trash2 />
+              Delete permanently
+            </DropdownMenuItem>
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>

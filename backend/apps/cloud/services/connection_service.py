@@ -9,6 +9,7 @@ from apps.cloud.services.credential_service import CredentialService
 from apps.common.constants import ConnectionStatus, ProviderType
 from apps.common.exceptions import (
     ConnectionAlreadyExistsException,
+    ConnectionDisabledException,
     ConnectionNotFoundException,
     InvalidProviderException,
 )
@@ -124,6 +125,35 @@ class ConnectionService:
 
         logger.info(
             "Cloud connection disabled",
+            extra={
+                "user_id": user.id,
+                "connection_uuid": str(connection.uuid),
+                "provider": connection.provider,
+            },
+        )
+        return connection
+
+    @staticmethod
+    @transaction.atomic
+    def enable_connection(*, user, connection_uuid) -> CloudConnection:
+        connection = ConnectionService.get_connection(
+            user=user,
+            connection_uuid=connection_uuid,
+        )
+
+        if connection.status == ConnectionStatus.ACTIVE:
+            return connection
+
+        if connection.status != ConnectionStatus.DISABLED:
+            raise ConnectionDisabledException(
+                "Only a disabled connection can be enabled."
+            )
+
+        connection.status = ConnectionStatus.ACTIVE
+        connection.save(update_fields=["status", "updated_at"])
+
+        logger.info(
+            "Cloud connection enabled",
             extra={
                 "user_id": user.id,
                 "connection_uuid": str(connection.uuid),

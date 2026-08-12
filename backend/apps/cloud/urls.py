@@ -3,6 +3,7 @@ from django.urls import path
 from apps.cloud.views import (
     CloudConnectionDetailAPIView,
     CloudConnectionDisableAPIView,
+    CloudConnectionEnableAPIView,
     CloudConnectionHealthAPIView,
     CloudConnectionListAPIView,
     CloudConnectionUnlinkAPIView,
@@ -37,6 +38,11 @@ urlpatterns = [
         "connections/<uuid:connection_uuid>/disable/",
         CloudConnectionDisableAPIView.as_view(),
         name="connection-disable",
+    ),
+    path(
+        "connections/<uuid:connection_uuid>/enable/",
+        CloudConnectionEnableAPIView.as_view(),
+        name="connection-enable",
     ),
     path(
         "connections/<uuid:connection_uuid>/unlink/",

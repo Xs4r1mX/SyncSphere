@@ -18,6 +18,8 @@ export function FileListTable({
   onCopy,
   onDownload,
   onMove,
+  onTransfer,
+  onPermanentDelete,
 }) {
   if (isLoading) {
     return (
@@ -98,6 +100,8 @@ export function FileListTable({
                         onCopy={onCopy}
                         onDownload={onDownload}
                         onMove={onMove}
+                        onTransfer={onTransfer}
+                        onPermanentDelete={onPermanentDelete}
                       />
                     </div>
                   </td>

@@ -6,3 +6,6 @@ class TransfersConfig(AppConfig):
     name = "apps.transfers"
     label = "transfers"
     verbose_name = "Transfers"
+
+    def ready(self):
+        from apps.transfers import tasks as _tasks  # noqa: F401

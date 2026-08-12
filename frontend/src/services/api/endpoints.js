@@ -15,6 +15,7 @@ const endpoints = {
     connections: '/cloud/connections/',
     connection: (uuid) => `/cloud/connections/${uuid}/`,
     connectionDisable: (uuid) => `/cloud/connections/${uuid}/disable/`,
+    connectionEnable: (uuid) => `/cloud/connections/${uuid}/enable/`,
     connectionUnlink: (uuid) => `/cloud/connections/${uuid}/unlink/`,
     connectionHealth: (uuid) => `/cloud/connections/${uuid}/health/`,
     providerAuthorize: (provider) => `/cloud/providers/${provider}/authorize/`,
@@ -32,6 +33,12 @@ const endpoints = {
     copy: (uuid, itemId) => `/files/${uuid}/${encodeURIComponent(itemId)}/copy/`,
     restore: (uuid, itemId) =>
       `/files/${uuid}/${encodeURIComponent(itemId)}/restore/`,
+  },
+  transfers: {
+    list: '/transfers/',
+    job: (uuid) => `/transfers/${uuid}/`,
+    items: (uuid) => `/transfers/${uuid}/items/`,
+    cancel: (uuid) => `/transfers/${uuid}/cancel/`,
   },
 };
 

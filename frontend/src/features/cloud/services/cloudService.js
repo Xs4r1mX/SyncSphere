@@ -10,6 +10,10 @@ const cloudService = {
     return api.get(endpoints.cloud.connection(uuid));
   },
 
+  updateConnection(uuid, payload) {
+    return api.patch(endpoints.cloud.connection(uuid), payload);
+  },
+
   authorizeProvider(provider) {
     return api.get(endpoints.cloud.providerAuthorize(provider));
   },
@@ -20,6 +24,10 @@ const cloudService = {
 
   disableConnection(uuid) {
     return api.post(endpoints.cloud.connectionDisable(uuid));
+  },
+
+  enableConnection(uuid) {
+    return api.post(endpoints.cloud.connectionEnable(uuid));
   },
 
   getConnectionHealth(uuid) {

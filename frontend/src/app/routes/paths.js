@@ -15,6 +15,8 @@ export const PATHS = {
   CLOUD_CONNECTION_SUCCESS: '/cloud/connections/success',
   CLOUD_CONNECTION_ERROR: '/cloud/connections/error',
   TRANSFER_HISTORY: '/transfer-history',
+  TRANSFER_DETAIL: '/transfer-history/:jobUuid',
+  transferDetail: (jobUuid) => `/transfer-history/${jobUuid}`,
   ACTIVITY: '/activity',
   PROFILE: '/profile',
   SETTINGS: '/settings',
