@@ -41,42 +41,6 @@ def emit_domain_event(
     try:
         from apps.common.tasks.dispatch_domain_event import dispatch_domain_event
 
-        # #region agent log
-        try:
-            import json
-            import time
-
-            from core.celery import app as celery_app
-
-            with open(
-                r"f:\Projects\PERSONAL\SyncSphere\debug-d38c45.log",
-                "a",
-                encoding="utf-8",
-            ) as _f:
-                _f.write(
-                    json.dumps(
-                        {
-                            "sessionId": "d38c45",
-                            "runId": "pre-fix",
-                            "hypothesisId": "A",
-                            "location": "apps/common/events/emit.py:enqueue",
-                            "message": "enqueue dispatch_domain_event",
-                            "data": {
-                                "task_name": dispatch_domain_event.name,
-                                "action": event.action,
-                                "has_dispatch_registered": (
-                                    dispatch_domain_event.name in celery_app.tasks
-                                ),
-                            },
-                            "timestamp": int(time.time() * 1000),
-                        }
-                    )
-                    + "\n"
-                )
-        except Exception:
-            pass
-        # #endregion
-
         dispatch_domain_event.apply_async(
             kwargs={
                 "event_payload": event.to_dict(),
