@@ -9,6 +9,13 @@ import {
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PATHS } from '@/app/routes/paths';
 import { useAuth } from '@/features/auth';
+import { getActivityIcon } from '@/features/activity/constants/actions';
+import { useActivity } from '@/features/activity/hooks/useActivity';
+import {
+  formatActivityDescription,
+  formatActivityTitle,
+  formatRelativeTime,
+} from '@/features/activity/utils/formatActivity';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -52,9 +59,11 @@ export function DashboardPage() {
   const { user } = useAuth();
   const connectionsQuery = useCloudConnections();
   const transfersQuery = useTransfers();
+  const activityQuery = useActivity({ limit: 5 });
 
   const connections = connectionsQuery.data ?? [];
   const transfers = transfersQuery.data ?? [];
+  const recentActivity = activityQuery.data?.items ?? [];
   const isLoading = connectionsQuery.isLoading || transfersQuery.isLoading;
 
   const activeTransfers = transfers.filter((job) => isInFlightStatus(job.status)).length;
@@ -172,6 +181,58 @@ export function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent activity</CardTitle>
+          <CardDescription>
+            Latest events across connections, files, and transfers.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          {activityQuery.isLoading ? (
+            <>
+              <Skeleton className="h-14 w-full" />
+              <Skeleton className="h-14 w-full" />
+            </>
+          ) : recentActivity.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No activity yet. Connect a storage or start a transfer to see events here.
+            </p>
+          ) : (
+            recentActivity.map((entry) => {
+              const Icon = getActivityIcon(entry.action, entry.resource_type);
+              return (
+                <div
+                  key={entry.uuid}
+                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 p-3"
+                >
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted">
+                    <Icon className="size-4 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
+                      {formatActivityTitle(entry)}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {formatActivityDescription(entry)} ·{' '}
+                      {formatRelativeTime(entry.created_at)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })
+          )}
+          <Button
+            render={<Link to={PATHS.ACTIVITY} />}
+            variant="ghost"
+            className="justify-start px-0"
+          >
+            <Activity />
+            View all activity
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

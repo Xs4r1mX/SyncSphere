@@ -40,6 +40,10 @@ const endpoints = {
     items: (uuid) => `/transfers/${uuid}/items/`,
     cancel: (uuid) => `/transfers/${uuid}/cancel/`,
   },
+  activity: {
+    list: '/activity/',
+    detail: (uuid) => `/activity/${uuid}/`,
+  },
 };
 
 export default endpoints;
