@@ -25,6 +25,7 @@ import {
 } from '../hooks/useConnectionActions';
 import { useConnectProvider } from '../hooks/useConnectProvider';
 import { useUnlinkConnection } from '../hooks/useUnlinkConnection';
+import { StartTransferDialog } from '@/features/transfers/components/StartTransferDialog';
 
 function ConnectionsSkeleton() {
   return (
@@ -55,6 +56,7 @@ export function CloudStoragesPage() {
 
   const [renameConnection, setRenameConnection] = useState(null);
   const [disableTarget, setDisableTarget] = useState(null);
+  const [migrateConnection, setMigrateConnection] = useState(null);
 
   const connections = connectionsQuery.data ?? [];
   const hasConnections = connections.length > 0;
@@ -110,6 +112,7 @@ export function CloudStoragesPage() {
               onDisable={setDisableTarget}
               onEnable={(uuid) => enableConnection.mutate(uuid)}
               onHealthCheck={(uuid) => checkHealth.mutate(uuid)}
+              onMigrate={setMigrateConnection}
             />
           ))}
         </section>
@@ -182,6 +185,17 @@ export function CloudStoragesPage() {
         }}
         connection={disableTarget}
         onConfirm={(uuid) => disableConnection.mutate(uuid)}
+      />
+
+      <StartTransferDialog
+        open={Boolean(migrateConnection)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setMigrateConnection(null);
+          }
+        }}
+        sourceConnectionUuid={migrateConnection?.uuid}
+        migrateEntire
       />
     </div>
   );

@@ -19,11 +19,18 @@ import { ROOT_ID } from '@/features/files/constants/fileTypes';
 import { useFileList } from '@/features/files/hooks/useFileList';
 import { useCreateTransfer } from '../hooks/useTransferMutations';
 
+const ROOT_MIGRATE_ITEM = {
+  provider_item_id: ROOT_ID,
+  name: 'My Drive',
+  is_folder: true,
+};
+
 export function StartTransferDialog({
   open,
   onOpenChange,
   item,
   sourceConnectionUuid,
+  migrateEntire = false,
 }) {
   const navigate = useNavigate();
   const connectionsQuery = useCloudConnections();
@@ -33,6 +40,8 @@ export function StartTransferDialog({
   const [destParentId, setDestParentId] = useState(ROOT_ID);
   const [mode, setMode] = useState('copy');
   const [conflictPolicy, setConflictPolicy] = useState('reject');
+
+  const transferItem = migrateEntire ? ROOT_MIGRATE_ITEM : item;
 
   const destFoldersQuery = useFileList(destConnectionUuid, {
     parentId: ROOT_ID,
@@ -71,22 +80,23 @@ export function StartTransferDialog({
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!item || !destConnectionUuid) {
+    if (!transferItem || !destConnectionUuid) {
       return;
     }
 
-    const operation = item.is_folder
-      ? mode === 'move'
-        ? 'move_all'
-        : 'copy_all'
-      : mode;
+    const operation =
+      transferItem.is_folder || migrateEntire
+        ? mode === 'move'
+          ? 'move_all'
+          : 'copy_all'
+        : mode;
 
     createTransfer.mutate(
       {
         operation,
         source_connection_uuid: sourceConnectionUuid,
         dest_connection_uuid: destConnectionUuid,
-        source_item_id: item.provider_item_id,
+        source_item_id: transferItem.provider_item_id,
         dest_parent_id: destParentId,
         conflict_policy: conflictPolicy,
       },
@@ -99,15 +109,31 @@ export function StartTransferDialog({
     );
   };
 
+  const title = migrateEntire
+    ? 'Migrate entire cloud'
+    : 'Transfer to another cloud';
+
+  const description = migrateEntire
+    ? 'Copy or move everything from this storage (My Drive) to another connected account.'
+    : `Copy or move “${item?.name}” to a different connected storage.`;
+
+  const operationOptions = migrateEntire || transferItem?.is_folder
+    ? [
+        { value: 'copy', label: 'Copy all' },
+        { value: 'move', label: 'Move all' },
+      ]
+    : [
+        { value: 'copy', label: 'Copy' },
+        { value: 'move', label: 'Move' },
+      ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Transfer to another cloud</DialogTitle>
-            <DialogDescription>
-              Copy or move &ldquo;{item?.name}&rdquo; to a different connected storage.
-            </DialogDescription>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
 
           {destConnections.length === 0 ? (
@@ -122,12 +148,17 @@ export function StartTransferDialog({
                   id="transfer-operation"
                   value={mode}
                   onValueChange={setMode}
-                  options={[
-                    { value: 'copy', label: 'Copy' },
-                    { value: 'move', label: 'Move' },
-                  ]}
+                  options={operationOptions}
                 />
               </div>
+
+              {mode === 'move' ? (
+                <p className="text-sm text-muted-foreground">
+                  {migrateEntire
+                    ? 'Move all deletes files from the source after they are written to the destination. Root itself is not deleted.'
+                    : 'Move deletes the source after a successful write to the destination.'}
+                </p>
+              ) : null}
 
               <div className="grid gap-2">
                 <Label htmlFor="transfer-destination">Destination storage</Label>

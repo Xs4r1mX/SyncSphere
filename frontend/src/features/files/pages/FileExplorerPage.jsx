@@ -53,6 +53,7 @@ export function FileExplorerPage() {
   const [copyItemState, setCopyItemState] = useState(null);
   const [moveItemState, setMoveItemState] = useState(null);
   const [transferItemState, setTransferItemState] = useState(null);
+  const [migrateDriveOpen, setMigrateDriveOpen] = useState(false);
   const [permanentDeleteItem, setPermanentDeleteItem] = useState(null);
 
   const connectionQuery = useQuery({
@@ -187,6 +188,7 @@ export function FileExplorerPage() {
         onToggleTrashed={setShowTrashed}
         onCreateFolder={() => setCreateFolderOpen(true)}
         onUpload={handleUpload}
+        onMigrate={() => setMigrateDriveOpen(true)}
       />
 
       {!showTrashed && breadcrumb ? (
@@ -348,6 +350,13 @@ export function FileExplorerPage() {
         }}
         item={transferItemState}
         sourceConnectionUuid={connectionUuid}
+      />
+
+      <StartTransferDialog
+        open={migrateDriveOpen}
+        onOpenChange={setMigrateDriveOpen}
+        sourceConnectionUuid={connectionUuid}
+        migrateEntire
       />
     </div>
   );

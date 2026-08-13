@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { FolderPlus, Trash2, Upload } from 'lucide-react';
+import { ArrowLeftRight, FolderPlus, Trash2, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -9,6 +9,7 @@ export function FileExplorerToolbar({
   onToggleTrashed,
   onCreateFolder,
   onUpload,
+  onMigrate,
 }) {
   const fileInputRef = useRef(null);
 
@@ -47,6 +48,12 @@ export function FileExplorerToolbar({
           <FolderPlus />
           New folder
         </Button>
+        {onMigrate ? (
+          <Button variant="secondary" disabled={showTrashed} onClick={onMigrate}>
+            <ArrowLeftRight />
+            Migrate drive
+          </Button>
+        ) : null}
       </div>
 
       <Button

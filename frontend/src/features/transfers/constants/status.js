@@ -39,7 +39,7 @@ export function formatStatusLabel(status) {
 export function getJobStatusVariant(status) {
   switch (status) {
     case 'success':
-      return 'secondary';
+      return 'success';
     case 'failed':
       return 'destructive';
     case 'cancelled':

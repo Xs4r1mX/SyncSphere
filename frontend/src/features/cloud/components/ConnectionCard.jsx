@@ -29,7 +29,7 @@ import {
 function getStatusVariant(status) {
   switch (status) {
     case 'active':
-      return 'secondary';
+      return 'success';
     case 'error':
     case 'expired':
       return 'destructive';
@@ -83,6 +83,7 @@ export function ConnectionCard({
   onDisable,
   onEnable,
   onHealthCheck,
+  onMigrate,
   isDisconnecting,
   isCheckingHealth,
   isEnabling,
@@ -142,6 +143,11 @@ export function ConnectionCard({
             <DropdownMenuItem onClick={() => onRename(connection)}>
               Rename
             </DropdownMenuItem>
+            {connection.status === 'active' && onMigrate ? (
+              <DropdownMenuItem onClick={() => onMigrate(connection)}>
+                Migrate to another cloud
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem
               disabled={isCheckingHealth}
               onClick={() => onHealthCheck(connection.uuid)}
