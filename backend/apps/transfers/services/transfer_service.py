@@ -1,10 +1,18 @@
 import logging
+from datetime import datetime
+from typing import Any
 
 from django.db import transaction
 from django.utils import timezone
 
+from apps.activity.constants import (
+    ActivityAction,
+    ActivityResourceType,
+    ActivityStatus,
+)
 from apps.cloud.services.connection_service import ConnectionService
 from apps.common.constants import ConnectionStatus
+from apps.common.events import emit_domain_event
 from apps.common.exceptions import (
     ConnectionDisabledException,
     TransferInvalidStateException,
@@ -18,6 +26,9 @@ from apps.transfers.constants import (
 from apps.transfers.models import TransferJob
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_PAGE_LIMIT = 50
+MAX_PAGE_LIMIT = 100
 
 
 class TransferService:
@@ -71,6 +82,23 @@ class TransferService:
         job.celery_task_id = async_result.id or ""
         job.save(update_fields=["celery_task_id", "updated_at"])
 
+        emit_domain_event(
+            action=ActivityAction.TRANSFER_CREATED,
+            user=user,
+            resource_type=ActivityResourceType.TRANSFER,
+            resource_id=str(job.uuid),
+            resource_name=job.source_item_name or job.source_item_id,
+            connection=source,
+            provider=source.provider,
+            request_id=request_id or "",
+            metadata={
+                "operation": operation,
+                "conflict_policy": conflict_policy,
+                "dest_connection_uuid": str(dest.uuid),
+                "source_item_id": source_item_id,
+            },
+        )
+
         logger.info(
             "Transfer job enqueued",
             extra={
@@ -98,14 +126,47 @@ class TransferService:
         )
 
     @staticmethod
-    def list_transfers(*, user, status: str | None = None) -> list[TransferJob]:
+    def list_transfers(
+        *,
+        user,
+        status: str | None = None,
+        source_connection_uuid=None,
+        dest_connection_uuid=None,
+        operation: str | None = None,
+        created_after: datetime | None = None,
+        created_before: datetime | None = None,
+        limit: int = DEFAULT_PAGE_LIMIT,
+        offset: int = 0,
+    ) -> dict[str, Any]:
+        resolved_limit = TransferService._clamp_limit(limit)
+        resolved_offset = max(0, offset)
+
         qs = TransferJob.objects.filter(user=user).select_related(
             "source_connection",
             "dest_connection",
         )
         if status:
             qs = qs.filter(status=status)
-        return list(qs.order_by("-created_at"))
+        if source_connection_uuid:
+            qs = qs.filter(source_connection__uuid=source_connection_uuid)
+        if dest_connection_uuid:
+            qs = qs.filter(dest_connection__uuid=dest_connection_uuid)
+        if operation:
+            qs = qs.filter(operation=operation)
+        if created_after:
+            qs = qs.filter(created_at__gte=created_after)
+        if created_before:
+            qs = qs.filter(created_at__lte=created_before)
+
+        qs = qs.order_by("-created_at")
+        total = qs.count()
+        items = list(qs[resolved_offset : resolved_offset + resolved_limit])
+        return {
+            "items": items,
+            "limit": resolved_limit,
+            "offset": resolved_offset,
+            "total": total,
+        }
 
     @staticmethod
     def get_transfer(*, user, job_uuid) -> TransferJob:
@@ -156,11 +217,36 @@ class TransferService:
                     "updated_at",
                 ]
             )
+            action = ActivityAction.TRANSFER_CANCELLED
+            event_status = ActivityStatus.SUCCESS
         else:
             job.save(update_fields=["cancel_requested", "updated_at"])
+            action = ActivityAction.TRANSFER_CANCEL_REQUESTED
+            event_status = ActivityStatus.SUCCESS
+
+        emit_domain_event(
+            action=action,
+            user=user,
+            resource_type=ActivityResourceType.TRANSFER,
+            resource_id=str(job.uuid),
+            resource_name=job.source_item_name or job.source_item_id,
+            connection=job.source_connection,
+            provider=job.source_connection.provider,
+            status=event_status,
+            metadata={
+                "operation": job.operation,
+                "job_status": job.status,
+            },
+        )
 
         logger.info(
             "Transfer cancel requested",
             extra={"job_uuid": str(job.uuid), "user_id": user.id, "status": job.status},
         )
         return job
+
+    @staticmethod
+    def _clamp_limit(limit: int) -> int:
+        if limit < 1:
+            return DEFAULT_PAGE_LIMIT
+        return min(limit, MAX_PAGE_LIMIT)

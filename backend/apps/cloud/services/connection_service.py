@@ -3,10 +3,12 @@ from typing import Any, Optional
 
 from django.db import IntegrityError, transaction
 
+from apps.activity.constants import ActivityAction, ActivityResourceType
 from apps.cloud.models import CloudConnection
 from apps.cloud.providers import ProviderFactory
 from apps.cloud.services.credential_service import CredentialService
 from apps.common.constants import ConnectionStatus, ProviderType
+from apps.common.events import emit_domain_event
 from apps.common.exceptions import (
     ConnectionAlreadyExistsException,
     ConnectionDisabledException,
@@ -123,6 +125,16 @@ class ConnectionService:
         connection.status = ConnectionStatus.DISABLED
         connection.save(update_fields=["status", "updated_at"])
 
+        emit_domain_event(
+            action=ActivityAction.CONNECTION_DISABLED,
+            user=user,
+            resource_type=ActivityResourceType.CONNECTION,
+            resource_id=str(connection.uuid),
+            resource_name=connection.display_name,
+            connection=connection,
+            provider=connection.provider,
+        )
+
         logger.info(
             "Cloud connection disabled",
             extra={
@@ -151,6 +163,16 @@ class ConnectionService:
 
         connection.status = ConnectionStatus.ACTIVE
         connection.save(update_fields=["status", "updated_at"])
+
+        emit_domain_event(
+            action=ActivityAction.CONNECTION_ENABLED,
+            user=user,
+            resource_type=ActivityResourceType.CONNECTION,
+            resource_id=str(connection.uuid),
+            resource_name=connection.display_name,
+            connection=connection,
+            provider=connection.provider,
+        )
 
         logger.info(
             "Cloud connection enabled",
@@ -223,6 +245,17 @@ class ConnectionService:
             },
         )
 
+        emit_domain_event(
+            action=ActivityAction.CONNECTION_LINKED,
+            user=user,
+            resource_type=ActivityResourceType.CONNECTION,
+            resource_id=str(connection.uuid),
+            resource_name=connection.display_name,
+            connection=connection,
+            provider=connection.provider,
+            metadata={"created": created},
+        )
+
         logger.info(
             "Cloud connection %s via OAuth",
             "created" if created else "updated",
@@ -260,6 +293,19 @@ class ConnectionService:
                 )
 
         connection_uuid_str = str(connection.uuid)
+        provider = connection.provider
+        display_name = connection.display_name
+
+        emit_domain_event(
+            action=ActivityAction.CONNECTION_UNLINKED,
+            user=user,
+            resource_type=ActivityResourceType.CONNECTION,
+            resource_id=connection_uuid_str,
+            resource_name=display_name,
+            connection=connection,
+            provider=provider,
+        )
+
         connection.delete()
 
         logger.info(
@@ -267,6 +313,6 @@ class ConnectionService:
             extra={
                 "user_id": user.id,
                 "connection_uuid": connection_uuid_str,
-                "provider": connection.provider,
+                "provider": provider,
             },
         )

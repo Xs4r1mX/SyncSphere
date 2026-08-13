@@ -8,6 +8,7 @@ from apps.transfers.serializers import (
     CreateTransferSerializer,
     TransferItemSerializer,
     TransferJobSerializer,
+    TransferListQuerySerializer,
 )
 from apps.transfers.services import TransferService
 
@@ -16,16 +17,30 @@ class TransferListCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        status_filter = request.query_params.get("status")
+        query = TransferListQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        data = query.validated_data
         try:
-            jobs = TransferService.list_transfers(
+            result = TransferService.list_transfers(
                 user=request.user,
-                status=status_filter,
+                status=data.get("status"),
+                source_connection_uuid=data.get("source_connection_uuid"),
+                dest_connection_uuid=data.get("dest_connection_uuid"),
+                operation=data.get("operation"),
+                created_after=data.get("created_after"),
+                created_before=data.get("created_before"),
+                limit=data.get("limit", 50),
+                offset=data.get("offset", 0),
             )
             return ApiResponse(
                 success=True,
                 message="Transfers fetched successfully.",
-                data=TransferJobSerializer(jobs, many=True).data,
+                data={
+                    "items": TransferJobSerializer(result["items"], many=True).data,
+                    "limit": result["limit"],
+                    "offset": result["offset"],
+                    "total": result["total"],
+                },
                 status_code=status.HTTP_200_OK,
             )
         except AppException as exc:

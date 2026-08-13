@@ -3,6 +3,12 @@ import logging
 from django.db import transaction
 from django.utils import timezone
 
+from apps.activity.constants import (
+    ActivityAction,
+    ActivityResourceType,
+    ActivityStatus,
+)
+from apps.common.events import emit_domain_event
 from apps.common.exceptions import (
     InsufficientStorageException,
     ProviderRateLimitedException,
@@ -197,6 +203,7 @@ class TransferExecutor:
             connection_uuid=job.dest_connection.uuid,
             name=name,
             parent_id=dest_parent_id,
+            emit_event=False,
         )
 
         # Verify destination folder exists before any source cleanup.
@@ -256,6 +263,7 @@ class TransferExecutor:
             parent_id=dest_parent_id,
             content=download.content,
             content_type=download.content_type or item.mime_type or "application/octet-stream",
+            emit_event=False,
         )
 
         # Verify destination before any source mutation.
@@ -297,6 +305,7 @@ class TransferExecutor:
                 connection_uuid=job.source_connection.uuid,
                 item_id=item.source_item_id,
                 permanent=True,
+                emit_event=False,
             )
         except Exception as exc:
             logger.warning(
@@ -344,6 +353,7 @@ class TransferExecutor:
                     connection_uuid=job.source_connection.uuid,
                     item_id=folder.source_item_id,
                     permanent=True,
+                    emit_event=False,
                 )
             except Exception as exc:
                 logger.warning(
@@ -406,6 +416,7 @@ class TransferExecutor:
                 "updated_at",
             ]
         )
+        TransferExecutor._emit_terminal_event(job)
         return job
 
     @staticmethod
@@ -413,6 +424,7 @@ class TransferExecutor:
         job.status = TransferJobStatus.CANCELLED
         job.finished_at = timezone.now()
         job.save(update_fields=["status", "finished_at", "updated_at"])
+        TransferExecutor._emit_terminal_event(job)
         return job
 
     @staticmethod
@@ -430,4 +442,41 @@ class TransferExecutor:
                 "updated_at",
             ]
         )
+        TransferExecutor._emit_terminal_event(job)
         return job
+
+    @staticmethod
+    def _emit_terminal_event(job: TransferJob) -> None:
+        if job.status == TransferJobStatus.CANCELLED:
+            action = ActivityAction.TRANSFER_CANCELLED
+            status = ActivityStatus.SUCCESS
+        elif job.status in (
+            TransferJobStatus.SUCCESS,
+            TransferJobStatus.PARTIAL_SUCCESS,
+        ):
+            action = ActivityAction.TRANSFER_COMPLETED
+            status = ActivityStatus.SUCCESS
+        else:
+            action = ActivityAction.TRANSFER_FAILED
+            status = ActivityStatus.FAILED
+
+        emit_domain_event(
+            action=action,
+            user=job.user,
+            resource_type=ActivityResourceType.TRANSFER,
+            resource_id=str(job.uuid),
+            resource_name=job.source_item_name or job.source_item_id,
+            connection=job.source_connection,
+            provider=job.source_connection.provider,
+            status=status,
+            metadata={
+                "operation": job.operation,
+                "job_status": job.status,
+                "items_completed": job.items_completed,
+                "items_failed": job.items_failed,
+                "items_total": job.items_total,
+                "bytes_transferred": job.bytes_transferred,
+                "error_code": job.error_code,
+                "dest_connection_uuid": str(job.dest_connection.uuid),
+            },
+        )

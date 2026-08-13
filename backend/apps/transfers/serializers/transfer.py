@@ -1,7 +1,12 @@
 from rest_framework import serializers
 
-from apps.transfers.constants import TransferConflictPolicy, TransferOperation
+from apps.transfers.constants import (
+    TransferConflictPolicy,
+    TransferJobStatus,
+    TransferOperation,
+)
 from apps.transfers.models import TransferItem, TransferJob
+from apps.transfers.services.transfer_service import DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT
 
 
 class CreateTransferSerializer(serializers.Serializer):
@@ -25,6 +30,28 @@ class CreateTransferSerializer(serializers.Serializer):
         if not value.strip():
             raise serializers.ValidationError("source_item_id is required.")
         return value.strip()
+
+
+class TransferListQuerySerializer(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=TransferJobStatus.choices,
+        required=False,
+    )
+    source_connection_uuid = serializers.UUIDField(required=False)
+    dest_connection_uuid = serializers.UUIDField(required=False)
+    operation = serializers.ChoiceField(
+        choices=TransferOperation.choices,
+        required=False,
+    )
+    created_after = serializers.DateTimeField(required=False)
+    created_before = serializers.DateTimeField(required=False)
+    limit = serializers.IntegerField(
+        required=False,
+        min_value=1,
+        max_value=MAX_PAGE_LIMIT,
+        default=DEFAULT_PAGE_LIMIT,
+    )
+    offset = serializers.IntegerField(required=False, min_value=0, default=0)
 
 
 class TransferJobSerializer(serializers.ModelSerializer):

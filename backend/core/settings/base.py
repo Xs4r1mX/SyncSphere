@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'apps.cloud',
     'apps.files',
     'apps.transfers',
-    'apps.activity',
+    'apps.activity.apps.ActivityConfig',
 ]
 
 MIDDLEWARE = [
