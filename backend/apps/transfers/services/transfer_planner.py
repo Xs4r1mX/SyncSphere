@@ -16,7 +16,7 @@ from apps.transfers.constants import (
     TransferOperation,
 )
 from apps.transfers.models import TransferItem, TransferJob
-from apps.transfers.services.name_resolver import resolve_destination_name
+from apps.transfers.services.name_resolver import DestinationNameResolver
 
 logger = logging.getLogger(__name__)
 
@@ -37,12 +37,22 @@ class TransferPlanner:
 
     @staticmethod
     @transaction.atomic
-    def build_plan(*, job: TransferJob) -> TransferJob:
+    def build_plan(
+        *,
+        job: TransferJob,
+        name_resolver: DestinationNameResolver | None = None,
+    ) -> TransferJob:
         job.status = TransferJobStatus.PLANNING
         job.save(update_fields=["status", "updated_at"])
 
         source_uuid = job.source_connection.uuid
         user = job.user
+        if name_resolver is None:
+            name_resolver = DestinationNameResolver(
+                user=user,
+                connection_uuid=job.dest_connection.uuid,
+                conflict_policy=job.conflict_policy,
+            )
 
         source_item = FileService.get_item(
             user=user,
@@ -64,12 +74,9 @@ class TransferPlanner:
         total_bytes = sum(node.size_bytes for node in nodes if node.kind == TransferItemKind.FILE)
         TransferPlanner._enforce_size_limit(total_bytes)
 
-        root_dest_name = resolve_destination_name(
-            user=user,
-            connection_uuid=job.dest_connection.uuid,
+        root_dest_name = name_resolver.resolve(
             parent_id=job.dest_parent_id,
             desired_name=source_item.name,
-            conflict_policy=job.conflict_policy,
         )
 
         TransferItem.objects.filter(job=job).delete()

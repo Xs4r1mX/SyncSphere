@@ -17,7 +17,7 @@ from apps.transfers.constants import (
     TransferOperation,
 )
 from apps.transfers.models import TransferItem, TransferJob
-from apps.transfers.services.name_resolver import resolve_destination_name
+from apps.transfers.services.name_resolver import DestinationNameResolver
 from apps.transfers.services.transfer_planner import TransferPlanner
 
 logger = logging.getLogger(__name__)
@@ -45,8 +45,13 @@ class TransferExecutor:
         if job.cancel_requested and job.status == TransferJobStatus.PENDING:
             return TransferExecutor._finalize_cancelled(job)
 
+        name_resolver = DestinationNameResolver(
+            user=job.user,
+            connection_uuid=job.dest_connection.uuid,
+            conflict_policy=job.conflict_policy,
+        )
         try:
-            TransferPlanner.build_plan(job=job)
+            TransferPlanner.build_plan(job=job, name_resolver=name_resolver)
             job.refresh_from_db()
             TransferExecutor._preflight_quota(job)
 
@@ -54,7 +59,7 @@ class TransferExecutor:
             job.started_at = timezone.now()
             job.save(update_fields=["status", "started_at", "updated_at"])
 
-            TransferExecutor._execute_items(job)
+            TransferExecutor._execute_items(job, name_resolver=name_resolver)
             job.refresh_from_db()
             return TransferExecutor._finalize_job(job)
         except ProviderRateLimitedException:
@@ -87,7 +92,11 @@ class TransferExecutor:
             )
 
     @staticmethod
-    def _execute_items(job: TransferJob) -> None:
+    def _execute_items(
+        job: TransferJob,
+        *,
+        name_resolver: DestinationNameResolver,
+    ) -> None:
         # Maps source folder id -> dest folder id for nested parents.
         source_folder_to_dest: dict[str, str] = {}
         items = list(job.items.order_by("sequence", "id"))
@@ -103,6 +112,7 @@ class TransferExecutor:
                     job=job,
                     item=item,
                     source_folder_to_dest=source_folder_to_dest,
+                    name_resolver=name_resolver,
                 )
             except ProviderRateLimitedException:
                 raise
@@ -123,6 +133,7 @@ class TransferExecutor:
         job: TransferJob,
         item: TransferItem,
         source_folder_to_dest: dict[str, str],
+        name_resolver: DestinationNameResolver,
     ) -> None:
         item.status = TransferItemStatus.RUNNING
         item.save(update_fields=["status", "updated_at"])
@@ -139,6 +150,7 @@ class TransferExecutor:
                 item=item,
                 dest_parent_id=dest_parent_id,
                 source_folder_to_dest=source_folder_to_dest,
+                name_resolver=name_resolver,
             )
             return
 
@@ -146,6 +158,7 @@ class TransferExecutor:
             job=job,
             item=item,
             dest_parent_id=dest_parent_id,
+            name_resolver=name_resolver,
         )
 
     @staticmethod
@@ -167,16 +180,17 @@ class TransferExecutor:
         item: TransferItem,
         dest_parent_id: str,
         source_folder_to_dest: dict[str, str],
+        name_resolver: DestinationNameResolver,
     ) -> None:
         name = item.dest_name or item.source_name
         if item.sequence != 0:
-            name = resolve_destination_name(
-                user=job.user,
-                connection_uuid=job.dest_connection.uuid,
+            name = name_resolver.resolve(
                 parent_id=dest_parent_id,
                 desired_name=item.source_name,
-                conflict_policy=job.conflict_policy,
             )
+        else:
+            # Planner already reserved the root name on this resolver.
+            name_resolver.remember(parent_id=dest_parent_id, name=name)
 
         created = FileService.create_folder(
             user=job.user,
@@ -206,6 +220,8 @@ class TransferExecutor:
             ]
         )
         source_folder_to_dest[item.source_item_id] = verified.provider_item_id
+        # Brand-new dest folder has no children yet — avoid listing it per child file.
+        name_resolver.seed_empty(parent_id=verified.provider_item_id)
         job.items_completed += 1
         job.save(update_fields=["items_completed", "updated_at"])
 
@@ -215,6 +231,7 @@ class TransferExecutor:
         job: TransferJob,
         item: TransferItem,
         dest_parent_id: str,
+        name_resolver: DestinationNameResolver,
     ) -> None:
         download = FileService.download_file(
             user=job.user,
@@ -223,19 +240,14 @@ class TransferExecutor:
         )
 
         dest_name = item.dest_name or item.source_name
-        if item.sequence != 0 or job.operation in (
-            TransferOperation.COPY_ALL,
-            TransferOperation.MOVE_ALL,
-        ):
-            # Root single-file already resolved in planner; nested files resolve now.
-            if item.sequence != 0:
-                dest_name = resolve_destination_name(
-                    user=job.user,
-                    connection_uuid=job.dest_connection.uuid,
-                    parent_id=dest_parent_id,
-                    desired_name=item.source_name,
-                    conflict_policy=job.conflict_policy,
-                )
+        # Root single-file already resolved in planner; nested files resolve now.
+        if item.sequence != 0:
+            dest_name = name_resolver.resolve(
+                parent_id=dest_parent_id,
+                desired_name=item.source_name,
+            )
+        else:
+            name_resolver.remember(parent_id=dest_parent_id, name=dest_name)
 
         uploaded = FileService.upload_file(
             user=job.user,
