@@ -39,14 +39,6 @@ export function useActivity(filters = {}) {
   });
 }
 
-export function useActivityDetail(uuid, options = {}) {
-  return useQuery({
-    queryKey: activityQueryKeys.detail(uuid),
-    queryFn: () => activityApi.getActivity(uuid),
-    enabled: Boolean(uuid) && (options.enabled ?? true),
-  });
-}
-
 export function useActivityFeed(filters = {}) {
   const limit = filters.limit ?? DEFAULT_LIMIT;
   const baseFilters = {

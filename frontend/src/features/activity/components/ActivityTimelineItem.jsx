@@ -1,32 +1,18 @@
-import { Check, X } from 'lucide-react';
-
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { getActivityIcon } from '../constants/actions';
 import {
   formatActivityClock,
   formatActivityDescription,
   formatActivityTitle,
-  formatProviderLabel,
   formatResourceType,
 } from '../utils/formatActivity';
 
-function MetaLine({ ok, label }) {
-  return (
-    <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-      {ok ? (
-        <Check className="size-3.5 shrink-0 text-emerald-500" strokeWidth={2.5} />
-      ) : (
-        <X className="size-3.5 shrink-0 text-destructive" strokeWidth={2.5} />
-      )}
-      <span>{label}</span>
-    </div>
-  );
-}
-
-export function ActivityTimelineItem({ entry, isLast, onSelect }) {
+export function ActivityTimelineItem({ entry, isLast }) {
   const Icon = getActivityIcon(entry.action, entry.resource_type);
   const failed = entry.status === 'failed';
   const title = formatActivityTitle(entry);
+  const resourceTypeLabel = formatResourceType(entry);
 
   return (
     <article
@@ -70,25 +56,20 @@ export function ActivityTimelineItem({ entry, isLast, onSelect }) {
       </div>
 
       <div className="min-w-0">
-        <button
-          type="button"
-          onClick={() => onSelect?.(entry)}
-          className="group w-full rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={`View details for ${title}`}
-        >
-          <h3 className="pt-2 text-[15px] font-semibold tracking-tight text-foreground group-hover:underline">
-            {title}
-          </h3>
+        <h3 className="pt-2 text-[15px] font-semibold tracking-tight text-foreground">
+          {title}
+        </h3>
 
-          <div
-            className={cn(
-              'mt-3 overflow-hidden rounded-lg border border-border/60 bg-background/60 transition-colors group-hover:bg-muted/40',
-              failed
-                ? 'border-l-[3px] border-l-destructive'
-                : 'border-l-[3px] border-l-emerald-500',
-            )}
-          >
-            <div className="px-4 py-3">
+        <div
+          className={cn(
+            'mt-3 overflow-hidden rounded-lg border border-border/60 bg-background/60',
+            failed
+              ? 'border-l-[3px] border-l-destructive'
+              : 'border-l-[3px] border-l-emerald-500',
+          )}
+        >
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground">
                 {formatActivityDescription(entry)}
               </p>
@@ -98,24 +79,13 @@ export function ActivityTimelineItem({ entry, isLast, onSelect }) {
                   : 'Event completed successfully.'}
               </p>
             </div>
-          </div>
-
-          <div className="mt-3 grid gap-2">
-            <MetaLine
-              ok={!failed}
-              label={`${formatResourceType(entry.resource_type)} resource`}
-            />
-            {entry.provider ? (
-              <MetaLine
-                ok={!failed}
-                label={`Provider · ${formatProviderLabel(entry.provider)}`}
-              />
-            ) : null}
-            {entry.resource_name ? (
-              <MetaLine ok={!failed} label={entry.resource_name} />
+            {resourceTypeLabel !== '—' ? (
+              <Badge variant="secondary" className="shrink-0">
+                {resourceTypeLabel}
+              </Badge>
             ) : null}
           </div>
-        </button>
+        </div>
       </div>
     </article>
   );

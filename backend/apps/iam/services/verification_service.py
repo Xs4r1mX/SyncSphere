@@ -3,14 +3,15 @@ import datetime
 from django.conf import settings
 from django.utils import timezone
 
-from apps.iam.models import EmailVerificationToken
-
+from apps.activity.constants import ActivityAction, ActivityResourceType
+from apps.common.events import emit_domain_event
 from apps.common.exceptions import (
-    InvalidVerificationTokenException,
-    VerificationTokenExpiredException,
     EmailAlreadyVerifiedException,
+    InvalidVerificationTokenException,
     UserNotFoundException,
+    VerificationTokenExpiredException,
 )
+from apps.iam.models import EmailVerificationToken
 from apps.notification.services import EmailService
 
 
@@ -82,6 +83,14 @@ class VerificationService:
         verification.verified_at = timezone.now()
 
         verification.save(update_fields=["verified_at"])
+
+        emit_domain_event(
+            action=ActivityAction.AUTH_EMAIL_VERIFIED,
+            user=user,
+            resource_type=ActivityResourceType.ACCOUNT,
+            resource_id=str(user.uuid),
+            resource_name=user.email,
+        )
 
         return user
 

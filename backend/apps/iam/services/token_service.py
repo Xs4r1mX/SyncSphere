@@ -1,23 +1,20 @@
 from django.contrib.auth import get_user_model
-
 from django.db import transaction
-
-from rest_framework_simplejwt.token_blacklist.models import (
-    OutstandingToken,
-    BlacklistedToken,
-)
-
-
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken,
+)
+from rest_framework_simplejwt.tokens import RefreshToken
 
-
+from apps.activity.constants import ActivityAction, ActivityResourceType
+from apps.common.events import emit_domain_event
 from apps.common.exceptions import (
-    UserNotFoundException,
-    InactiveUserException,
     EmailNotVerifiedException,
+    InactiveUserException,
     InvalidRefreshTokenException,
+    UserNotFoundException,
 )
 
 User = get_user_model()
@@ -140,3 +137,11 @@ class TokenService:
         for token in outstanding_tokens:
 
             BlacklistedToken.objects.get_or_create(token=token)
+
+        emit_domain_event(
+            action=ActivityAction.AUTH_LOGOUT_ALL_DEVICES,
+            user=user,
+            resource_type=ActivityResourceType.ACCOUNT,
+            resource_id=str(user.uuid),
+            resource_name=getattr(user, "email", "") or "",
+        )

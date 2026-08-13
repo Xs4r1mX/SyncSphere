@@ -10,7 +10,7 @@ from apps.common.models.base import BaseModel
 
 
 class ActivityLog(BaseModel):
-    """User-scoped audit row for cloud, file, and transfer actions."""
+    """User-scoped audit row for account, cloud, file, and transfer actions."""
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

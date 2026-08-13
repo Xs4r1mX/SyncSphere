@@ -36,10 +36,21 @@ export function formatRelativeTime(isoDate) {
 }
 
 export function formatActivityTitle(entry) {
-  return getActivityActionLabel(entry.action);
+  if (entry?.title) {
+    return entry.title;
+  }
+  return getActivityActionLabel(entry?.action);
 }
 
-export function formatResourceType(resourceType) {
+export function formatResourceType(entryOrType) {
+  if (entryOrType && typeof entryOrType === 'object') {
+    if (entryOrType.resource_type_label) {
+      return entryOrType.resource_type_label;
+    }
+    return formatResourceType(entryOrType.resource_type);
+  }
+
+  const resourceType = entryOrType;
   if (!resourceType) {
     return '—';
   }
@@ -69,9 +80,8 @@ export function formatActivityDescription(entry) {
   }
 
   if (parts.length === 0) {
-    return entry.resource_type
-      ? `${entry.resource_type} activity`
-      : 'Workspace event';
+    const typeLabel = entry.resource_type_label || formatResourceType(entry.resource_type);
+    return typeLabel !== '—' ? `${typeLabel} activity` : 'Workspace event';
   }
 
   return parts.join(' · ');

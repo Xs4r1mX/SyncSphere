@@ -1,6 +1,11 @@
 from rest_framework import serializers
 
-from apps.activity.constants import ActivityAction, ActivityResourceType
+from apps.activity.constants import (
+    ActivityAction,
+    ActivityResourceType,
+    activity_resource_type_label,
+    activity_title_for_action,
+)
 from apps.activity.models import ActivityLog
 from apps.activity.services.activity_service import DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT
 
@@ -11,13 +16,17 @@ class ActivityLogSerializer(serializers.ModelSerializer):
         read_only=True,
         allow_null=True,
     )
+    title = serializers.SerializerMethodField()
+    resource_type_label = serializers.SerializerMethodField()
 
     class Meta:
         model = ActivityLog
         fields = (
             "uuid",
             "action",
+            "title",
             "resource_type",
+            "resource_type_label",
             "resource_id",
             "resource_name",
             "connection_uuid",
@@ -29,6 +38,12 @@ class ActivityLogSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = fields
+
+    def get_title(self, obj: ActivityLog) -> str:
+        return activity_title_for_action(obj.action)
+
+    def get_resource_type_label(self, obj: ActivityLog) -> str:
+        return activity_resource_type_label(obj.resource_type)
 
 
 class ActivityListQuerySerializer(serializers.Serializer):

@@ -1,20 +1,21 @@
-from django.contrib.auth.hashers import check_password
-from django.conf import settings
-from django.utils import timezone
-from django.db import transaction
 from datetime import timedelta
-from .token_service import TokenService
 
+from django.conf import settings
+from django.contrib.auth.hashers import check_password
+from django.db import transaction
+from django.utils import timezone
+
+from apps.activity.constants import ActivityAction, ActivityResourceType
+from apps.common.events import emit_domain_event
 from apps.common.exceptions.iam import (
-    IncorrectPasswordException,
-    UserNotFoundException,
-    InactiveUserException,
     EmailNotVerifiedException,
+    InactiveUserException,
+    IncorrectPasswordException,
     InvalidPasswordResetTokenException,
+    UserNotFoundException,
 )
-
 from apps.iam.models import PasswordResetToken, User
-
+from apps.iam.services.token_service import TokenService
 from apps.notification.services import EmailService
 
 
@@ -44,6 +45,15 @@ class PasswordService:
         user.set_password(new_password)
 
         user.save(update_fields=["password"])
+
+        emit_domain_event(
+            action=ActivityAction.AUTH_PASSWORD_CHANGED,
+            user=user,
+            resource_type=ActivityResourceType.ACCOUNT,
+            resource_id=str(user.uuid),
+            resource_name=user.email,
+            metadata={"via": "change_password"},
+        )
 
         TokenService.logout_all_devices(user)
 
@@ -98,6 +108,14 @@ class PasswordService:
         PasswordService._send_password_reset_email(
             user,
             reset_token,
+        )
+
+        emit_domain_event(
+            action=ActivityAction.AUTH_PASSWORD_RESET_REQUESTED,
+            user=user,
+            resource_type=ActivityResourceType.ACCOUNT,
+            resource_id=str(user.uuid),
+            resource_name=user.email,
         )
 
     @staticmethod
@@ -183,6 +201,15 @@ class PasswordService:
 
         # Mark reset token as consumed
         reset_token.mark_as_used()
+
+        emit_domain_event(
+            action=ActivityAction.AUTH_PASSWORD_RESET_COMPLETED,
+            user=user,
+            resource_type=ActivityResourceType.ACCOUNT,
+            resource_id=str(user.uuid),
+            resource_name=user.email,
+            metadata={"via": "password_reset"},
+        )
 
         # Logout from all devices
         TokenService.logout_all_devices(user)

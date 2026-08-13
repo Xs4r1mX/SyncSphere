@@ -14,7 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ActivityDetailDialog } from '../components/ActivityDetailDialog';
 import { ActivityTimelineItem } from '../components/ActivityTimelineItem';
 import { RESOURCE_TYPE_FILTER_OPTIONS } from '../constants/actions';
 import { useActivityFeed } from '../hooks/useActivity';
@@ -34,7 +33,6 @@ function ActivitySkeleton() {
             <div className="grid gap-3 pt-1">
               <Skeleton className="h-4 w-40" />
               <Skeleton className="h-16 w-full max-w-xl" />
-              <Skeleton className="h-3 w-48" />
             </div>
           </div>
         ))}
@@ -46,7 +44,6 @@ function ActivitySkeleton() {
 export function ActivityPage() {
   const [resourceType, setResourceType] = useState('all');
   const [search, setSearch] = useState('');
-  const [selectedUuid, setSelectedUuid] = useState(null);
 
   const activityQuery = useActivityFeed({
     resource_type: resourceType,
@@ -68,12 +65,16 @@ export function ActivityPage() {
       const name = entry.resource_name ?? '';
       const provider = entry.provider ?? '';
       const type = entry.resource_type ?? '';
+      const typeLabel = entry.resource_type_label ?? '';
+      const action = entry.action ?? '';
 
       return (
         title.toLowerCase().includes(query) ||
         name.toLowerCase().includes(query) ||
         provider.toLowerCase().includes(query) ||
-        type.toLowerCase().includes(query)
+        type.toLowerCase().includes(query) ||
+        typeLabel.toLowerCase().includes(query) ||
+        action.toLowerCase().includes(query)
       );
     });
   }, [items, search]);
@@ -156,7 +157,6 @@ export function ActivityPage() {
                       key={entry.uuid}
                       entry={entry}
                       isLast={index === group.items.length - 1}
-                      onSelect={(item) => setSelectedUuid(item.uuid)}
                     />
                   ))}
                 </div>
@@ -177,16 +177,6 @@ export function ActivityPage() {
           ) : null}
         </Card>
       )}
-
-      <ActivityDetailDialog
-        open={Boolean(selectedUuid)}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedUuid(null);
-          }
-        }}
-        activityUuid={selectedUuid}
-      />
     </div>
   );
 }
