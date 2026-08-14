@@ -26,11 +26,23 @@ export function FileRowActions({
   onDelete,
   onRestore,
   onCopy,
+  onOpen,
   onDownload,
   onMove,
   onTransfer,
   onPermanentDelete,
 }) {
+  const handleOpen = () => {
+    if (item.web_view_link) {
+      window.open(item.web_view_link, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    onOpen(item);
+  };
+
+  const canOpen = item.can_open ?? (!item.is_folder || Boolean(item.web_view_link));
+  const canDownload = item.can_download ?? !item.is_folder;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -41,16 +53,14 @@ export function FileRowActions({
         <MoreHorizontal />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {!showTrashed && item.web_view_link ? (
-          <DropdownMenuItem
-            onClick={() => window.open(item.web_view_link, '_blank', 'noopener,noreferrer')}
-          >
+        {!showTrashed && canOpen ? (
+          <DropdownMenuItem onClick={handleOpen}>
             <ExternalLink />
             Open
           </DropdownMenuItem>
         ) : null}
 
-        {!showTrashed && !item.is_folder ? (
+        {!showTrashed && canDownload ? (
           <DropdownMenuItem onClick={() => onDownload(item)}>
             <Download />
             Download

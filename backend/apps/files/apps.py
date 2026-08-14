@@ -9,12 +9,10 @@ class FilesConfig(AppConfig):
 
     def ready(self):
         from apps.files.providers.factory import FileProviderFactory
+        from apps.files.providers.dropbox import DropboxFileAdapter
         from apps.files.providers.google_drive import GoogleDriveFileAdapter
-        from apps.files.providers.stubs import (
-            DropboxFileStubAdapter,
-            OneDriveFileStubAdapter,
-        )
+        from apps.files.providers.stubs import OneDriveFileStubAdapter
 
         FileProviderFactory.register(GoogleDriveFileAdapter)
-        FileProviderFactory.register(DropboxFileStubAdapter)
+        FileProviderFactory.register(DropboxFileAdapter)
         FileProviderFactory.register(OneDriveFileStubAdapter)

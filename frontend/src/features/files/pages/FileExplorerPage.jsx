@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import cloudApi from '@/features/cloud/api/cloudApi';
 import { cloudQueryKeys } from '@/features/cloud/constants/queryKeys';
+import { getRootBreadcrumbItem } from '@/features/cloud/utils/getProviderRootLabel';
 import { CopyFileDialog } from '../components/CopyFileDialog';
 import { CreateFolderDialog } from '../components/CreateFolderDialog';
 import { DeleteFileConfirmDialog } from '../components/DeleteFileConfirmDialog';
@@ -29,16 +30,13 @@ import {
   useCreateFolder,
   useDeleteFile,
   useDownloadFile,
+  useOpenFile,
   useRestoreFile,
   useUpdateFile,
   useUploadFile,
 } from '../hooks/useFileMutations';
 import { buildFolderOptions } from '../utils/buildFolderOptions';
 import { formatFileSize } from '../utils/formatFileSize';
-
-const ROOT_BREADCRUMB = [
-  { provider_item_id: ROOT_ID, name: 'My Drive', is_folder: true },
-];
 
 export function FileExplorerPage() {
   const { connectionUuid } = useParams();
@@ -83,19 +81,26 @@ export function FileExplorerPage() {
   const copyFile = useCopyFile(connectionUuid);
   const restoreFile = useRestoreFile(connectionUuid);
   const downloadFile = useDownloadFile(connectionUuid);
+  const openFile = useOpenFile(connectionUuid);
 
   const visibleItems =
     fileListQuery.data?.pages.flatMap((page) => page.items) ?? [];
 
+  const connection = connectionQuery.data;
+  const rootBreadcrumb = connection
+    ? [getRootBreadcrumbItem(connection.provider)]
+    : null;
+
   const breadcrumb =
     folderId === ROOT_ID
-      ? ROOT_BREADCRUMB
-      : breadcrumbQuery.data ?? null;
+      ? rootBreadcrumb
+      : breadcrumbQuery.data ?? rootBreadcrumb;
 
   const folderOptions = buildFolderOptions(
     breadcrumb,
     visibleItems,
     copyItemState?.provider_item_id ?? moveItemState?.provider_item_id,
+    connection?.provider,
   );
 
   const navigateToFolder = (nextFolderId) => {
@@ -152,7 +157,6 @@ export function FileExplorerPage() {
     );
   }
 
-  const connection = connectionQuery.data;
   const title = connection.display_name || connection.provider_label;
   const quotaUsed =
     quotaQuery.data?.quota_used_bytes ?? connection.quota_used_bytes;
@@ -212,7 +216,13 @@ export function FileExplorerPage() {
         onDelete={setDeleteItemState}
         onRestore={(itemId) => restoreFile.mutate(itemId)}
         onCopy={setCopyItemState}
-        onDownload={(item) => downloadFile.mutate(item.provider_item_id)}
+        onOpen={(item) => openFile.mutate(item)}
+        onDownload={(item) =>
+          downloadFile.mutate({
+            itemId: item.provider_item_id,
+            filename: item.name,
+          })
+        }
         onMove={setMoveItemState}
         onTransfer={setTransferItemState}
         onPermanentDelete={setPermanentDeleteItem}

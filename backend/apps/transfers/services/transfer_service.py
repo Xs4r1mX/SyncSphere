@@ -78,9 +78,20 @@ class TransferService:
             status=TransferJobStatus.PENDING,
         )
 
-        async_result = TransferService._enqueue(job=job, request_id=request_id)
-        job.celery_task_id = async_result.id or ""
-        job.save(update_fields=["celery_task_id", "updated_at"])
+        job_uuid = str(job.uuid)
+
+        def enqueue_after_commit() -> None:
+            async_result = TransferService._enqueue(
+                job_uuid=job_uuid,
+                user_id=job.user_id,
+                request_id=request_id,
+                provider=source.provider,
+            )
+            TransferJob.objects.filter(uuid=job_uuid).update(
+                celery_task_id=async_result.id or "",
+            )
+
+        transaction.on_commit(enqueue_after_commit)
 
         emit_domain_event(
             action=ActivityAction.TRANSFER_CREATED,
@@ -105,23 +116,28 @@ class TransferService:
                 "job_uuid": str(job.uuid),
                 "user_id": user.id,
                 "operation": operation,
-                "celery_task_id": job.celery_task_id,
                 "request_id": request_id,
             },
         )
         return job
 
     @staticmethod
-    def _enqueue(*, job: TransferJob, request_id: str | None):
+    def _enqueue(
+        *,
+        job_uuid: str,
+        user_id: int,
+        request_id: str | None,
+        provider: str,
+    ):
         from apps.transfers.tasks.run_transfer import execute_transfer
 
         return execute_transfer.apply_async(
             kwargs={
-                "job_uuid": str(job.uuid),
-                "user_id": job.user_id,
+                "job_uuid": job_uuid,
+                "user_id": user_id,
                 "request_id": request_id,
-                "operation_id": str(job.uuid),
-                "provider": job.source_connection.provider,
+                "operation_id": job_uuid,
+                "provider": provider,
             }
         )
 

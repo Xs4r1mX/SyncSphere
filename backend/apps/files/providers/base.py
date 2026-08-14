@@ -57,6 +57,14 @@ class CloudFileAdapter(ABC):
     ) -> FileDownloadDTO: ...
 
     @abstractmethod
+    def get_open_link(
+        self,
+        *,
+        credentials: dict[str, Any],
+        item_id: str,
+    ) -> str: ...
+
+    @abstractmethod
     def update_item(
         self,
         *,

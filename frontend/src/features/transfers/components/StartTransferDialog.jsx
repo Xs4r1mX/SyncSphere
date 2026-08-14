@@ -15,15 +15,10 @@ import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select';
 import { useCloudConnections } from '@/features/cloud/hooks/useCloudConnections';
 import { formatConnectionLabel } from '@/features/cloud/utils/formatConnectionLabel';
+import { getProviderRootLabel } from '@/features/cloud/utils/getProviderRootLabel';
 import { ROOT_ID } from '@/features/files/constants/fileTypes';
 import { useFileList } from '@/features/files/hooks/useFileList';
 import { useCreateTransfer } from '../hooks/useTransferMutations';
-
-const ROOT_MIGRATE_ITEM = {
-  provider_item_id: ROOT_ID,
-  name: 'My Drive',
-  is_folder: true,
-};
 
 export function StartTransferDialog({
   open,
@@ -41,13 +36,13 @@ export function StartTransferDialog({
   const [mode, setMode] = useState('copy');
   const [conflictPolicy, setConflictPolicy] = useState('reject');
 
-  const transferItem = migrateEntire ? ROOT_MIGRATE_ITEM : item;
-
-  const destFoldersQuery = useFileList(destConnectionUuid, {
-    parentId: ROOT_ID,
-    trashed: false,
-    enabled: open && Boolean(destConnectionUuid),
-  });
+  const sourceConnection = useMemo(
+    () =>
+      (connectionsQuery.data ?? []).find(
+        (connection) => connection.uuid === sourceConnectionUuid,
+      ),
+    [connectionsQuery.data, sourceConnectionUuid],
+  );
 
   const destConnections = useMemo(
     () =>
@@ -57,6 +52,29 @@ export function StartTransferDialog({
       ),
     [connectionsQuery.data, sourceConnectionUuid],
   );
+
+  const destConnection = useMemo(
+    () =>
+      destConnections.find((connection) => connection.uuid === destConnectionUuid),
+    [destConnections, destConnectionUuid],
+  );
+
+  const sourceRootLabel = getProviderRootLabel(sourceConnection?.provider);
+  const destRootLabel = getProviderRootLabel(destConnection?.provider);
+
+  const transferItem = migrateEntire
+    ? {
+        provider_item_id: ROOT_ID,
+        name: sourceRootLabel,
+        is_folder: true,
+      }
+    : item;
+
+  const destFoldersQuery = useFileList(destConnectionUuid, {
+    parentId: ROOT_ID,
+    trashed: false,
+    enabled: open && Boolean(destConnectionUuid),
+  });
 
   const destFolders = useMemo(
     () =>
@@ -114,7 +132,7 @@ export function StartTransferDialog({
     : 'Transfer to another cloud';
 
   const description = migrateEntire
-    ? 'Copy or move everything from this storage (My Drive) to another connected account.'
+    ? `Copy or move everything from this storage (${sourceRootLabel}) to another connected account.`
     : `Copy or move “${item?.name}” to a different connected storage.`;
 
   const operationOptions = migrateEntire || transferItem?.is_folder
@@ -184,7 +202,10 @@ export function StartTransferDialog({
                   onValueChange={setDestParentId}
                   disabled={destFoldersQuery.isLoading}
                   options={[
-                    { value: ROOT_ID, label: 'My Drive (root)' },
+                    {
+                      value: ROOT_ID,
+                      label: `${destRootLabel} (root)`,
+                    },
                     ...destFolders.map((folder) => ({
                       value: folder.provider_item_id,
                       label: folder.name,

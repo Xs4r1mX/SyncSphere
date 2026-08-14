@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from apps.common.exceptions.base import AppException
 from apps.common.responses import ApiResponse
+from apps.common.utils import attachment_disposition
 from apps.files.serializers import (
     BreadcrumbQuerySerializer,
     BreadcrumbSerializer,
@@ -260,11 +261,36 @@ class FileDownloadAPIView(APIView):
                 download.content,
                 content_type=download.content_type,
             )
-            response["Content-Disposition"] = (
-                f'attachment; filename="{download.name}"'
-            )
+            response["Content-Disposition"] = attachment_disposition(download.name)
             response["Content-Length"] = str(download.size)
             return response
+        except AppException as exc:
+            return ApiResponse(
+                success=False,
+                message=str(exc),
+                status_code=getattr(exc, "status_code", 500),
+            )
+
+
+class FileOpenAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, connection_uuid, item_id):
+        from apps.files.serializers import OpenLinkSerializer
+
+        try:
+            open_url = FileService.get_open_link(
+                user=request.user,
+                connection_uuid=connection_uuid,
+                item_id=item_id,
+            )
+            serializer = OpenLinkSerializer({"open_url": open_url})
+            return ApiResponse(
+                success=True,
+                message="Open link generated successfully.",
+                data=serializer.data,
+                status_code=status.HTTP_200_OK,
+            )
         except AppException as exc:
             return ApiResponse(
                 success=False,

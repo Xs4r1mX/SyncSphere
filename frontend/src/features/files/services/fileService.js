@@ -40,6 +40,10 @@ const fileService = {
     });
   },
 
+  openFile(connectionUuid, itemId) {
+    return api.get(endpoints.files.open(connectionUuid, itemId));
+  },
+
   copyItem(connectionUuid, itemId, payload) {
     return api.post(endpoints.files.copy(connectionUuid, itemId), payload);
   },

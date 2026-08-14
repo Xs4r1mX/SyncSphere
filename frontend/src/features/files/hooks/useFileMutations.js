@@ -136,13 +136,32 @@ export function useRestoreFile(connectionUuid) {
 
 export function useDownloadFile(connectionUuid) {
   return useMutation({
-    mutationFn: (itemId) => fileApi.downloadFile(connectionUuid, itemId),
+    mutationFn: ({ itemId, filename }) =>
+      fileApi.downloadFile(connectionUuid, itemId, filename),
     onSuccess: ({ blob, filename }) => {
       triggerBlobDownload(blob, filename);
       toast.success('Download started.');
     },
     onError: (error) => {
       toast.error(error.message || 'Could not download file.');
+    },
+  });
+}
+
+export function useOpenFile(connectionUuid) {
+  return useMutation({
+    mutationFn: (item) => fileApi.openFile(connectionUuid, item),
+    onSuccess: ({ mode, url }) => {
+      if (!url) {
+        return;
+      }
+      window.open(url, '_blank', 'noopener,noreferrer');
+      if (mode === 'blob') {
+        window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Could not open file.');
     },
   });
 }

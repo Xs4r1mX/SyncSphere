@@ -15,6 +15,8 @@ class FileItemDTO:
     modified_at: datetime | None = None
     trashed: bool = False
     web_view_link: str | None = None
+    can_open: bool = False
+    can_download: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -28,6 +30,8 @@ class FileItemDTO:
             "modified_at": self.modified_at.isoformat() if self.modified_at else None,
             "trashed": self.trashed,
             "web_view_link": self.web_view_link,
+            "can_open": self.can_open,
+            "can_download": self.can_download,
         }
 
 

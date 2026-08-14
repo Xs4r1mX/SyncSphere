@@ -16,6 +16,13 @@ from apps.common.exceptions import (
 
 logger = logging.getLogger(__name__)
 
+_OAUTH_PROVIDERS = frozenset(
+    {
+        ProviderType.GOOGLE_DRIVE,
+        ProviderType.DROPBOX,
+    }
+)
+
 
 class OAuthConnectionService:
     """Orchestrates provider OAuth connect flows."""
@@ -116,7 +123,7 @@ class OAuthConnectionService:
         if provider not in ProviderType.values:
             raise InvalidProviderException()
 
-        if provider != ProviderType.GOOGLE_DRIVE:
+        if provider not in _OAUTH_PROVIDERS:
             raise ProviderNotImplementedException(
                 f"OAuth is not implemented for provider '{provider}' yet."
             )
@@ -127,5 +134,7 @@ class OAuthConnectionService:
 
         if provider == ProviderType.GOOGLE_DRIVE:
             return settings.GOOGLE_OAUTH_REDIRECT_URI
+        if provider == ProviderType.DROPBOX:
+            return settings.DROPBOX_OAUTH_REDIRECT_URI
 
         raise InvalidProviderException()

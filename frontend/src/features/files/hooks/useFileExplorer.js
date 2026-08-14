@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { getRootBreadcrumbItem } from '@/features/cloud/utils/getProviderRootLabel';
 import { ROOT_ID } from '../constants/fileTypes';
 import { MAX_UPLOAD_BYTES } from '../constants/fileTypes';
 import { buildFolderOptions } from '../utils/buildFolderOptions';
@@ -16,11 +17,11 @@ import {
   useUploadFile,
 } from './useFileMutations';
 
-const ROOT_BREADCRUMB = [
-  { provider_item_id: ROOT_ID, name: 'My Drive', is_folder: true },
-];
-
-export function useFileExplorer(connectionUuid) {
+export function useFileExplorer(connectionUuid, provider = 'google_drive') {
+  const rootBreadcrumb = useMemo(
+    () => [getRootBreadcrumbItem(provider)],
+    [provider],
+  );
   const [searchParams, setSearchParams] = useSearchParams();
   const [showTrashed, setShowTrashed] = useState(false);
 
@@ -56,23 +57,25 @@ export function useFileExplorer(connectionUuid) {
     }
 
     if (folderId === ROOT_ID) {
-      return ROOT_BREADCRUMB;
+      return rootBreadcrumb;
     }
 
     if (breadcrumbQuery.data?.length) {
       return breadcrumbQuery.data;
     }
 
-    return ROOT_BREADCRUMB;
-  }, [showTrashed, folderId, breadcrumbQuery.data]);
+    return rootBreadcrumb;
+  }, [showTrashed, folderId, breadcrumbQuery.data, rootBreadcrumb]);
 
   const folderOptions = useMemo(
     () =>
       buildFolderOptions(
-        breadcrumbQuery.data ?? ROOT_BREADCRUMB,
+        breadcrumbQuery.data ?? rootBreadcrumb,
         visibleItems,
+        null,
+        provider,
       ),
-    [breadcrumbQuery.data, visibleItems],
+    [breadcrumbQuery.data, visibleItems, rootBreadcrumb, provider],
   );
 
   const navigateToFolder = useCallback(
@@ -200,7 +203,10 @@ export function useFileExplorer(connectionUuid) {
         return;
       }
 
-      downloadFileMutation.mutate(item.provider_item_id);
+      downloadFileMutation.mutate({
+        itemId: item.provider_item_id,
+        filename: item.name,
+      });
     },
     [downloadFileMutation],
   );

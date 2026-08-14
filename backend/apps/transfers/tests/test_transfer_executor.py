@@ -257,15 +257,17 @@ class TransferServiceAPIFlowTests(TestCase):
     def test_create_enqueues_task(self, mock_apply_async):
         mock_apply_async.return_value = MagicMock(id="celery-1")
 
-        job = TransferService.create_transfer(
-            user=self.user,
-            operation=TransferOperation.COPY,
-            source_connection_uuid=self.source.uuid,
-            dest_connection_uuid=self.dest.uuid,
-            source_item_id="file-9",
-            request_id="req-1",
-        )
+        with self.captureOnCommitCallbacks(execute=True):
+            job = TransferService.create_transfer(
+                user=self.user,
+                operation=TransferOperation.COPY,
+                source_connection_uuid=self.source.uuid,
+                dest_connection_uuid=self.dest.uuid,
+                source_item_id="file-9",
+                request_id="req-1",
+            )
 
+        job.refresh_from_db()
         self.assertEqual(job.status, TransferJobStatus.PENDING)
         self.assertEqual(job.celery_task_id, "celery-1")
         mock_apply_async.assert_called_once()

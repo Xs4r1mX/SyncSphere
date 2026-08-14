@@ -16,6 +16,7 @@ export function FileListTable({
   onDelete,
   onRestore,
   onCopy,
+  onOpen,
   onDownload,
   onMove,
   onTransfer,
@@ -98,6 +99,7 @@ export function FileListTable({
                         onDelete={onDelete}
                         onRestore={onRestore}
                         onCopy={onCopy}
+                        onOpen={onOpen}
                         onDownload={onDownload}
                         onMove={onMove}
                         onTransfer={onTransfer}

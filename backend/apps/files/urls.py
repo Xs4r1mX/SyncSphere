@@ -7,6 +7,7 @@ from apps.files.views import (
     FileDetailAPIView,
     FileDownloadAPIView,
     FileListAPIView,
+    FileOpenAPIView,
     FileQuotaAPIView,
     FileRestoreAPIView,
     FileUploadAPIView,
@@ -39,6 +40,11 @@ urlpatterns = [
         "<uuid:connection_uuid>/<path:item_id>/download/",
         FileDownloadAPIView.as_view(),
         name="file-download",
+    ),
+    path(
+        "<uuid:connection_uuid>/<path:item_id>/open/",
+        FileOpenAPIView.as_view(),
+        name="file-open",
     ),
     path(
         "<uuid:connection_uuid>/<path:item_id>/copy/",

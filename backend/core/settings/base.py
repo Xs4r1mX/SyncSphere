@@ -207,6 +207,20 @@ GOOGLE_OAUTH_SCOPES = [
     "openid",
 ]
 
+DROPBOX_OAUTH_APP_KEY = os.getenv("DROPBOX_OAUTH_APP_KEY", "")
+DROPBOX_OAUTH_APP_SECRET = os.getenv("DROPBOX_OAUTH_APP_SECRET", "")
+DROPBOX_OAUTH_REDIRECT_URI = os.getenv("DROPBOX_OAUTH_REDIRECT_URI", "").rstrip("/")
+
+DROPBOX_OAUTH_SCOPES = [
+    "account_info.read",
+    "files.metadata.read",
+    "files.metadata.write",
+    "files.content.read",
+    "files.content.write",
+    "sharing.read",
+    "sharing.write",
+]
+
 OAUTH_STATE_EXPIRY_MINUTES = int(os.getenv("OAUTH_STATE_EXPIRY_MINUTES", 10))
 
 CLOUD_OAUTH_SUCCESS_URL = (
@@ -227,6 +241,10 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_EXPOSE_HEADERS = [
+    "Content-Disposition",
+]
 
 MAX_FILE_UPLOAD_SIZE_BYTES = int(
     os.getenv("MAX_FILE_UPLOAD_SIZE_BYTES", 104857600)

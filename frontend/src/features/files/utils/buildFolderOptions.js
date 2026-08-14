@@ -1,7 +1,18 @@
-export function buildFolderOptions(breadcrumbItems, listItems, excludeItemId = null) {
+import { ROOT_ID } from '../constants/fileTypes';
+import { getProviderRootLabel } from '@/features/cloud/utils/getProviderRootLabel';
+
+export function buildFolderOptions(
+  breadcrumbItems,
+  listItems,
+  excludeItemId = null,
+  provider,
+) {
   const options = new Map();
 
-  options.set('root', { provider_item_id: 'root', name: 'My Drive' });
+  options.set('root', {
+    provider_item_id: 'root',
+    name: getProviderRootLabel(provider),
+  });
 
   for (const item of breadcrumbItems ?? []) {
     if (item.is_folder && item.provider_item_id !== excludeItemId) {

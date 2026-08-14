@@ -8,6 +8,7 @@ from apps.files.serializers.file import (
     FileListQuerySerializer,
     FileListSerializer,
     FileUploadSerializer,
+    OpenLinkSerializer,
     QuotaSummarySerializer,
     UpdateItemSerializer,
 )
@@ -22,6 +23,7 @@ __all__ = [
     "FileListQuerySerializer",
     "FileListSerializer",
     "FileUploadSerializer",
+    "OpenLinkSerializer",
     "QuotaSummarySerializer",
     "UpdateItemSerializer",
 ]

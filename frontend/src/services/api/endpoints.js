@@ -30,6 +30,7 @@ const endpoints = {
     item: (uuid, itemId) => `/files/${uuid}/${encodeURIComponent(itemId)}/`,
     download: (uuid, itemId) =>
       `/files/${uuid}/${encodeURIComponent(itemId)}/download/`,
+    open: (uuid, itemId) => `/files/${uuid}/${encodeURIComponent(itemId)}/open/`,
     copy: (uuid, itemId) => `/files/${uuid}/${encodeURIComponent(itemId)}/copy/`,
     restore: (uuid, itemId) =>
       `/files/${uuid}/${encodeURIComponent(itemId)}/restore/`,

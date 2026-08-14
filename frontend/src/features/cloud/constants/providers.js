@@ -9,7 +9,7 @@ export const cloudProviders = [
     id: 'dropbox',
     name: 'Dropbox',
     description: 'Sync files from your Dropbox account.',
-    available: false,
+    available: true,
   },
   {
     id: 'onedrive',

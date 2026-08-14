@@ -25,6 +25,9 @@ class StubCloudFileAdapter(CloudFileAdapter):
     def download_file(self, **kwargs):
         self._raise()
 
+    def get_open_link(self, **kwargs):
+        self._raise()
+
     def update_item(self, **kwargs):
         self._raise()
 

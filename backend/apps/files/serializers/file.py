@@ -12,6 +12,12 @@ class FileItemSerializer(serializers.Serializer):
     modified_at = serializers.DateTimeField(allow_null=True)
     trashed = serializers.BooleanField()
     web_view_link = serializers.CharField(allow_null=True)
+    can_open = serializers.BooleanField()
+    can_download = serializers.BooleanField()
+
+
+class OpenLinkSerializer(serializers.Serializer):
+    open_url = serializers.URLField()
 
 
 class FileListSerializer(serializers.Serializer):

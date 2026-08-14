@@ -3,6 +3,7 @@ import { unwrapResponse } from '@/services/api/unwrapResponse';
 
 import fileService from '../services/fileService';
 import { parseFilename } from '../utils/downloadBlob';
+import { resolveViewMimeType } from '../utils/mimeType';
 
 export const listItems = (connectionUuid, params) =>
   unwrapResponse(fileService.listItems(connectionUuid, params));
@@ -31,7 +32,38 @@ export const copyItem = (connectionUuid, itemId, payload) =>
 export const restoreItem = (connectionUuid, itemId) =>
   unwrapResponse(fileService.restoreItem(connectionUuid, itemId));
 
-export async function downloadFile(connectionUuid, itemId) {
+export async function openFile(connectionUuid, item) {
+  if (item.web_view_link) {
+    return { mode: 'direct', url: item.web_view_link };
+  }
+
+  try {
+    const { open_url: openUrl } = await unwrapResponse(
+      fileService.openFile(connectionUuid, item.provider_item_id),
+    );
+    if (openUrl) {
+      return { mode: 'direct', url: openUrl };
+    }
+  } catch {
+    // Fall back to inline blob preview when provider preview links are unavailable.
+  }
+
+  const { blob, filename } = await downloadFile(
+    connectionUuid,
+    item.provider_item_id,
+    item.name,
+  );
+  const mimeType = resolveViewMimeType(item.mime_type, filename, blob.type);
+  const viewBlob =
+    blob.type === mimeType ? blob : new Blob([blob], { type: mimeType });
+
+  return {
+    mode: 'blob',
+    url: URL.createObjectURL(viewBlob),
+  };
+}
+
+export async function downloadFile(connectionUuid, itemId, fallbackFilename) {
   try {
     const response = await fileService.downloadFile(connectionUuid, itemId);
     const contentType = response.headers['content-type'] ?? '';
@@ -44,9 +76,13 @@ export async function downloadFile(connectionUuid, itemId) {
       });
     }
 
+    const parsedFilename = parseFilename(response.headers['content-disposition']);
+    const filename =
+      parsedFilename !== 'download' ? parsedFilename : fallbackFilename || 'download';
+
     return {
       blob: response.data,
-      filename: parseFilename(response.headers['content-disposition']),
+      filename,
     };
   } catch (error) {
     if (error instanceof AppError) {
@@ -78,6 +114,7 @@ const fileApi = {
   updateItem,
   deleteItem,
   downloadFile,
+  openFile,
   copyItem,
   restoreItem,
 };

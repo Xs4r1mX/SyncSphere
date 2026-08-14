@@ -1,4 +1,3 @@
-import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -13,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ConnectionCard, ProviderCard } from '../components/ConnectionCard';
+import { ConnectProviderButton } from '../components/ConnectProviderButton';
 import { DisableConnectionDialog } from '../components/DisableConnectionDialog';
 import { RenameConnectionDialog } from '../components/RenameConnectionDialog';
 import { cloudProviders } from '../constants/providers';
@@ -70,13 +70,11 @@ export function CloudStoragesPage() {
         title="Cloud Storages"
         description="Manage your connected cloud accounts."
         action={
-          <Button
+          <ConnectProviderButton
             disabled={connectProvider.isPending}
-            onClick={() => connectProvider.mutate('google_drive')}
-          >
-            <Plus />
-            Connect storage
-          </Button>
+            connectingProviderId={connectingProviderId}
+            onConnect={(providerId) => connectProvider.mutate(providerId)}
+          />
         }
       />
 
@@ -125,13 +123,11 @@ export function CloudStoragesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button
+            <ConnectProviderButton
               disabled={connectProvider.isPending}
-              onClick={() => connectProvider.mutate('google_drive')}
-            >
-              <Plus />
-              Connect your first storage
-            </Button>
+              connectingProviderId={connectingProviderId}
+              onConnect={(providerId) => connectProvider.mutate(providerId)}
+            />
           </CardContent>
         </Card>
       )}

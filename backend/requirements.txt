@@ -1,6 +1,7 @@
 asgiref==3.12.1
 celery==5.5.3
 cryptography==45.0.5
+dropbox==12.0.2
 Django==6.0.7
 django-cors-headers==4.9.0
 djangorestframework==3.17.1

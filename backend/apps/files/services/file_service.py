@@ -248,6 +248,20 @@ class FileService:
         return adapter.download_file(credentials=credentials, item_id=item_id)
 
     @staticmethod
+    def get_open_link(
+        *,
+        user,
+        connection_uuid,
+        item_id: str,
+    ) -> str:
+        connection, credentials = FileService._resolve_connection(
+            user=user,
+            connection_uuid=connection_uuid,
+        )
+        adapter = FileService._adapter_for(connection)
+        return adapter.get_open_link(credentials=credentials, item_id=item_id)
+
+    @staticmethod
     def update_item(
         *,
         user,

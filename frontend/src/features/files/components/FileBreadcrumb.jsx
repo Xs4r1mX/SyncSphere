@@ -6,7 +6,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { ROOT_ID } from '../constants/fileTypes';
 
 export function FileBreadcrumb({ items, onNavigate }) {
   if (!items?.length) {
@@ -39,8 +38,4 @@ export function FileBreadcrumb({ items, onNavigate }) {
       </BreadcrumbList>
     </Breadcrumb>
   );
-}
-
-export function getRootBreadcrumbItem() {
-  return { provider_item_id: ROOT_ID, name: 'My Drive', is_folder: true };
 }

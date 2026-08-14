@@ -20,6 +20,7 @@ from apps.common.exceptions import (
     ProviderRateLimitedException,
 )
 from apps.files.dto import FileDownloadDTO, FileItemDTO, FileListResultDTO, QuotaSummaryDTO
+from apps.common.utils import file_action_flags
 
 from .base import CloudFileAdapter
 
@@ -103,17 +104,27 @@ class GoogleDriveFileAdapter(CloudFileAdapter):
     def _to_item_dto(self, payload: dict[str, Any]) -> FileItemDTO:
         mime_type = payload.get("mimeType", "")
         parents = payload.get("parents") or []
+        is_folder = mime_type == GOOGLE_FOLDER_MIME_TYPE
+        web_view_link = payload.get("webViewLink")
+        trashed = bool(payload.get("trashed"))
+        can_open, can_download = file_action_flags(
+            is_folder=is_folder,
+            trashed=trashed,
+            web_view_link=web_view_link,
+        )
         return FileItemDTO(
             provider_item_id=payload["id"],
             name=payload.get("name", ""),
             mime_type=mime_type,
-            is_folder=mime_type == GOOGLE_FOLDER_MIME_TYPE,
+            is_folder=is_folder,
             parent_id=parents[0] if parents else None,
             size=self._parse_optional_int(payload.get("size")),
             created_at=self._parse_timestamp(payload.get("createdTime")),
             modified_at=self._parse_timestamp(payload.get("modifiedTime")),
-            trashed=bool(payload.get("trashed")),
-            web_view_link=payload.get("webViewLink"),
+            trashed=trashed,
+            web_view_link=web_view_link,
+            can_open=can_open,
+            can_download=can_download,
         )
 
     def list_items(
@@ -245,6 +256,23 @@ class GoogleDriveFileAdapter(CloudFileAdapter):
             content_type=metadata.mime_type or "application/octet-stream",
             size=len(content),
         )
+
+    def get_open_link(
+        self,
+        *,
+        credentials: dict[str, Any],
+        item_id: str,
+    ) -> str:
+        item = self.get_item(credentials=credentials, item_id=item_id)
+        if not item.can_open:
+            raise InvalidFileOperationException(
+                "This item cannot be opened in the browser."
+            )
+        if item.web_view_link:
+            return item.web_view_link
+        if item.is_folder:
+            return f"https://drive.google.com/drive/folders/{item_id}"
+        return f"https://drive.google.com/file/d/{item_id}/view"
 
     def update_item(
         self,
