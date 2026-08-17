@@ -52,7 +52,6 @@ STORAGES = {
 }
 
 EMAIL_PORT = int(os.getenv("EMAIL_PORT") or "587")
-EMAIL_BACKEND = os.getenv(
-    "EMAIL_BACKEND",
-    "django.core.mail.backends.console.EmailBackend",
-)
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))
+# Render free instances block outbound SMTP; env SMTP would hang /register.
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
