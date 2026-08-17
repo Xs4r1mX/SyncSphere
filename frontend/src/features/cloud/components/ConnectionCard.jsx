@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { getProviderDisplayName } from '../utils/getProviderRootLabel';
 import { formatConnectionLabel } from '../utils/formatConnectionLabel';
 import {
   formatQuotaLabel,
@@ -89,6 +90,7 @@ export function ConnectionCard({
   isEnabling,
 }) {
   const title = formatConnectionLabel(connection, { includeEmail: false });
+  const providerName = getProviderDisplayName(connection.provider);
   const subtitle =
     connection.account_email &&
     connection.account_email.toLowerCase() !== title.toLowerCase()
@@ -106,7 +108,7 @@ export function ConnectionCard({
             <div>
               <CardTitle>{title}</CardTitle>
               <CardDescription>
-                {subtitle || connection.provider_label}
+                {subtitle || providerName}
               </CardDescription>
             </div>
           </div>

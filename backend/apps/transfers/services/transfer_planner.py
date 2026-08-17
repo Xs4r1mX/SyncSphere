@@ -148,6 +148,7 @@ class TransferPlanner:
     ) -> list[PlannedNode]:
         if operation in (TransferOperation.COPY, TransferOperation.MOVE):
             size = root.size or 0
+            TransferPlanner._enforce_size_limit(size)
             return [
                 PlannedNode(
                     kind=TransferItemKind.FILE,
@@ -171,12 +172,14 @@ class TransferPlanner:
                 parent_source_id=None,
             )
         ]
+        running_bytes = 0
         TransferPlanner._walk_folder(
             user=user,
             connection_uuid=connection_uuid,
             folder=root,
             path_prefix=root.name,
             nodes=nodes,
+            running_bytes=running_bytes,
         )
         return nodes
 
@@ -188,7 +191,8 @@ class TransferPlanner:
         folder: FileItemDTO,
         path_prefix: str,
         nodes: list[PlannedNode],
-    ) -> None:
+        running_bytes: int = 0,
+    ) -> int:
         page_token = None
         while True:
             result = FileService.list_items(
@@ -213,21 +217,25 @@ class TransferPlanner:
                             parent_source_id=folder.provider_item_id,
                         )
                     )
-                    TransferPlanner._walk_folder(
+                    running_bytes = TransferPlanner._walk_folder(
                         user=user,
                         connection_uuid=connection_uuid,
                         folder=child,
                         path_prefix=child_path,
                         nodes=nodes,
+                        running_bytes=running_bytes,
                     )
                 else:
+                    file_size = child.size or 0
+                    running_bytes += file_size
+                    TransferPlanner._enforce_size_limit(running_bytes)
                     nodes.append(
                         PlannedNode(
                             kind=TransferItemKind.FILE,
                             source_item_id=child.provider_item_id,
                             source_name=child.name,
                             source_path=child_path,
-                            size_bytes=child.size or 0,
+                            size_bytes=file_size,
                             mime_type=child.mime_type,
                             parent_source_id=folder.provider_item_id,
                         )
@@ -235,6 +243,7 @@ class TransferPlanner:
             if not result.next_page_token:
                 break
             page_token = result.next_page_token
+        return running_bytes
 
     @staticmethod
     def _persist_items(

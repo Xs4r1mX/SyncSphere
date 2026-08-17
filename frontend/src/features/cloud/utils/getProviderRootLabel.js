@@ -1,11 +1,7 @@
-const ROOT_LABELS = {
-  google_drive: 'My Drive',
-  dropbox: 'All files',
-  onedrive: 'OneDrive',
-};
+import { getCloudProvider } from '../constants/providers';
 
 export function getProviderRootLabel(provider) {
-  return ROOT_LABELS[provider] ?? 'Root';
+  return getCloudProvider(provider)?.rootLabel ?? 'Root';
 }
 
 export function getRootBreadcrumbItem(provider) {
@@ -14,4 +10,8 @@ export function getRootBreadcrumbItem(provider) {
     name: getProviderRootLabel(provider),
     is_folder: true,
   };
+}
+
+export function getProviderDisplayName(provider) {
+  return getCloudProvider(provider)?.name ?? provider?.replaceAll('_', ' ') ?? 'Cloud storage';
 }

@@ -7,10 +7,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cloudProviders } from '../constants/providers';
+import { getAvailableCloudProviders } from '../constants/providers';
 
 export function ConnectProviderButton({ onConnect, connectingProviderId, disabled }) {
-  const availableProviders = cloudProviders.filter((provider) => provider.available);
+  const availableProviders = getAvailableCloudProviders();
 
   if (availableProviders.length === 0) {
     return (

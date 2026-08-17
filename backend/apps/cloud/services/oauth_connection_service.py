@@ -20,6 +20,7 @@ _OAUTH_PROVIDERS = frozenset(
     {
         ProviderType.GOOGLE_DRIVE,
         ProviderType.DROPBOX,
+        ProviderType.ONEDRIVE,
     }
 )
 
@@ -136,5 +137,7 @@ class OAuthConnectionService:
             return settings.GOOGLE_OAUTH_REDIRECT_URI
         if provider == ProviderType.DROPBOX:
             return settings.DROPBOX_OAUTH_REDIRECT_URI
+        if provider == ProviderType.ONEDRIVE:
+            return settings.ONEDRIVE_OAUTH_REDIRECT_URI
 
         raise InvalidProviderException()

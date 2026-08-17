@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import cloudApi from '@/features/cloud/api/cloudApi';
 import { cloudQueryKeys } from '@/features/cloud/constants/queryKeys';
 import { getRootBreadcrumbItem } from '@/features/cloud/utils/getProviderRootLabel';
+import { providerSupportsTrashBrowse } from '@/features/cloud/constants/providers';
 import { CopyFileDialog } from '../components/CopyFileDialog';
 import { CreateFolderDialog } from '../components/CreateFolderDialog';
 import { DeleteFileConfirmDialog } from '../components/DeleteFileConfirmDialog';
@@ -188,6 +189,7 @@ export function FileExplorerPage() {
 
       <FileExplorerToolbar
         showTrashed={showTrashed}
+        trashSupported={providerSupportsTrashBrowse(connection.provider)}
         isUploading={uploadFile.isPending}
         onToggleTrashed={setShowTrashed}
         onCreateFolder={() => setCreateFolderOpen(true)}

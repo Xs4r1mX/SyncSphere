@@ -432,6 +432,17 @@ class TransferExecutor:
         job.status = TransferJobStatus.FAILED
         job.error_code = exc.__class__.__name__
         job.error_message = str(exc)
+        logger.warning(
+            "Transfer job failed",
+            extra={
+                "job_uuid": str(job.uuid),
+                "operation": job.operation,
+                "source_provider": job.source_connection.provider,
+                "dest_provider": job.dest_connection.provider,
+                "error_code": job.error_code,
+                "error_message": job.error_message,
+            },
+        )
         job.finished_at = timezone.now()
         job.save(
             update_fields=[

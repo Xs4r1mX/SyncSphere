@@ -27,6 +27,11 @@ DROPBOX_OAUTH_APP_KEY = "test-dropbox-app-key"
 DROPBOX_OAUTH_APP_SECRET = "test-dropbox-app-secret"
 DROPBOX_OAUTH_REDIRECT_URI = "http://testserver/api/cloud/providers/dropbox/callback/"
 
+ONEDRIVE_OAUTH_CLIENT_ID = "test-onedrive-client-id"
+ONEDRIVE_OAUTH_CLIENT_SECRET = "test-onedrive-client-secret"
+ONEDRIVE_OAUTH_REDIRECT_URI = "http://testserver/api/cloud/providers/onedrive/callback/"
+ONEDRIVE_OAUTH_TENANT = "common"
+
 MAX_FILE_UPLOAD_SIZE_BYTES = 104857600
 FILE_LIST_DEFAULT_PAGE_SIZE = 50
 FILE_LIST_MAX_PAGE_SIZE = 100

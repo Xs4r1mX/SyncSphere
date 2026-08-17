@@ -11,8 +11,8 @@ class FilesConfig(AppConfig):
         from apps.files.providers.factory import FileProviderFactory
         from apps.files.providers.dropbox import DropboxFileAdapter
         from apps.files.providers.google_drive import GoogleDriveFileAdapter
-        from apps.files.providers.stubs import OneDriveFileStubAdapter
+        from apps.files.providers.onedrive import OneDriveFileAdapter
 
         FileProviderFactory.register(GoogleDriveFileAdapter)
         FileProviderFactory.register(DropboxFileAdapter)
-        FileProviderFactory.register(OneDriveFileStubAdapter)
+        FileProviderFactory.register(OneDriveFileAdapter)

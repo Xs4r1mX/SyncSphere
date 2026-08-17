@@ -11,8 +11,8 @@ class CloudConfig(AppConfig):
         from apps.cloud.providers.factory import ProviderFactory
         from apps.cloud.providers.dropbox import DropboxAdapter
         from apps.cloud.providers.google_drive import GoogleDriveAdapter
-        from apps.cloud.providers.stubs import OneDriveStubAdapter
+        from apps.cloud.providers.onedrive import OneDriveAdapter
 
         ProviderFactory.register(GoogleDriveAdapter)
         ProviderFactory.register(DropboxAdapter)
-        ProviderFactory.register(OneDriveStubAdapter)
+        ProviderFactory.register(OneDriveAdapter)

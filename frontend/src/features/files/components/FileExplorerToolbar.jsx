@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export function FileExplorerToolbar({
   showTrashed,
+  trashSupported = true,
   isUploading,
   onToggleTrashed,
   onCreateFolder,
@@ -56,13 +57,15 @@ export function FileExplorerToolbar({
         ) : null}
       </div>
 
-      <Button
-        variant={showTrashed ? 'default' : 'outline'}
-        onClick={() => onToggleTrashed(!showTrashed)}
-      >
-        <Trash2 />
-        {showTrashed ? 'Viewing trash' : 'Trash'}
-      </Button>
+      {trashSupported ? (
+        <Button
+          variant={showTrashed ? 'default' : 'outline'}
+          onClick={() => onToggleTrashed(!showTrashed)}
+        >
+          <Trash2 />
+          {showTrashed ? 'Viewing trash' : 'Trash'}
+        </Button>
+      ) : null}
     </div>
   );
 }
