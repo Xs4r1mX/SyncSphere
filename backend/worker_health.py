@@ -6,16 +6,27 @@ import os
 
 
 class HealthHandler(BaseHTTPRequestHandler):
+    _OK_PATHS = ("/", "/health", "/health/", "/api/health/")
+    _OK_BODY = b'{"status":"ok","role":"celery-worker"}\n'
+
     def do_GET(self):
-        if self.path in ("/", "/health", "/health/", "/api/health/"):
-            body = b'{"status":"ok","role":"celery-worker"}\n'
+        self._respond(include_body=True)
+
+    def do_HEAD(self):
+        # UptimeRobot and similar monitors often probe with HEAD.
+        self._respond(include_body=False)
+
+    def _respond(self, *, include_body: bool) -> None:
+        if self.path in self._OK_PATHS:
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Content-Length", str(len(self._OK_BODY)))
             self.end_headers()
-            self.wfile.write(body)
+            if include_body:
+                self.wfile.write(self._OK_BODY)
             return
         self.send_response(404)
+        self.send_header("Content-Length", "0")
         self.end_headers()
 
     def log_message(self, format, *args):
