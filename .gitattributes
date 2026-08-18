@@ -1,1 +1,2 @@
 backend/start.sh text eol=lf
+backend/worker.sh text eol=lf

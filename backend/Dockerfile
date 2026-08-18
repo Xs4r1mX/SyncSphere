@@ -18,8 +18,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-RUN chmod +x start.sh
+RUN chmod +x start.sh worker.sh
 
 EXPOSE 8000
 
+# Default = existing API. Worker service must override Docker Command to ./worker.sh
+# and set RUN_AS_WORKER=True. Do not change Docker Command on the API service.
 CMD ["./start.sh"]
