@@ -94,6 +94,15 @@ else:
             "PORT": os.getenv("DB_PORT"),
         }
     }
+    if os.getenv("DB_SSL", "False") == "True":
+        DATABASES["default"]["OPTIONS"] = {
+            "ssl": {
+                "ca": os.getenv(
+                    "DB_SSL_CA",
+                    "/etc/ssl/certs/ca-certificates.crt",
+                ),
+            }
+        }
 
 AUTH_USER_MODEL = "iam.User"
 

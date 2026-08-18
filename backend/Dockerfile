@@ -11,6 +11,7 @@ RUN apt-get update \
         gcc \
         pkg-config \
         default-libmysqlclient-dev \
+        ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
