@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import ssl
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -289,6 +290,29 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = os.getenv(
     "CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/1"
 )
+
+
+def _redis_ssl_options(url: str) -> dict | None:
+    """
+    Managed brokers (Upstash) use rediss://. Celery rejects that scheme unless
+    cert requirements are supplied explicitly, and kombu silently downgrades to
+    an unvalidated connection, so both sides get options built here.
+    """
+    if not url.startswith("rediss://"):
+        return None
+
+    cert_reqs = os.getenv("CELERY_REDIS_SSL_CERT_REQS", "CERT_REQUIRED")
+    return {"ssl_cert_reqs": getattr(ssl, cert_reqs, ssl.CERT_REQUIRED)}
+
+
+_broker_ssl_options = _redis_ssl_options(CELERY_BROKER_URL)
+if _broker_ssl_options:
+    CELERY_BROKER_USE_SSL = _broker_ssl_options
+
+_result_backend_ssl_options = _redis_ssl_options(CELERY_RESULT_BACKEND)
+if _result_backend_ssl_options:
+    CELERY_REDIS_BACKEND_USE_SSL = _result_backend_ssl_options
+
 CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", "False") == "True"
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TASK_TRACK_STARTED = True
